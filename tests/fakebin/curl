@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+echo "curl reached in tests" >> "$FAKE_LOG"; exit 99

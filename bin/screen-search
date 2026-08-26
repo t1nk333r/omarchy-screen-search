@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# Screen Search — OCR + Circle to Search for Omarchy.
+#
+#   screen-search                     run the default mode
+#   screen-search circle | ocr        summon the Screen Search OSD
+#   screen-search search "query"      text search with the current provider
+#   screen-search visual FILE.png     visual search (clipboard + provider page)
+#   screen-search clipboard           search the clipboard's text
+#   screen-search provider [ID]       print or set the default provider
+#   screen-search providers           list providers and capabilities
+#   screen-search act ACTION …        internal: used by the OSD
+#   screen-search --version | --help
+#
+# Exit codes: 0 ok (cancel is 0) · 1 failure · 2 bad argument/provider ·
+# 3 browser could not be launched · 4 provider lacks this capability ·
+# 11 no text/QR found · 12 OCR engine missing.
+set -euo pipefail
+
+PLUGIN_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/.." && pwd)"
+export PLUGIN_DIR
+source "$PLUGIN_DIR/lib/actions.sh"
+
+VERSION=$(jq -r .version "$PLUGIN_DIR/manifest.json" 2>/dev/null || echo dev)
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
+
+shell_up() { omarchy-shell shell ping >/dev/null 2>&1; }
+
+# Summon the OSD; when the shell is not running fall back to a headless
+# flow so keybinds still do something useful.
+summon() {
+  local mode=$1
+  if shell_up; then
+    omarchy-shell shell summon "$PLUGIN_ID" "$(jq -cn --arg m "$mode" '{mode:$m}')" >/dev/null
+    return
+  fi
+  local json rc=0
+  json=$("$PLUGIN_DIR/bin/screen-search-capture" --mode "$mode") || rc=$?
+  case $rc in
+    0) ;;
+    10) exit 0 ;;
+    11) notify "No text detected" 󰴑; exit 11 ;;
+    12) notify "OCR engine unavailable" 󰴑; exit 12 ;;
+    *) notify "Capture failed" 󰴑; exit 1 ;;
+  esac
+  local file; file=$(jq -r .file <<<"$json")
+  if [[ $mode == ocr ]]; then
+    jq -rj .text <<<"$json" | wl-copy
+    notify "Copied text from selection to clipboard" 󰴑
+  else
+    wl-copy --type image/png < "$file"
+    notify "Copied selection to clipboard" 󰄄
+  fi
+  discard_capture "$file"
+}
+
+cmd=${1:-}
+[[ -n $cmd ]] || cmd=$(setting defaultMode circle)
+shift || true
+
+case $cmd in
+  -h|--help) usage ;;
+  --version) echo "screen-search $VERSION" ;;
+  circle|ocr) summon "$cmd" ;;
+  search)
+    [[ -n ${1:-} ]] || fail "usage: screen-search search \"query\"" 2
+    run_action search --text "$1" ${2:+--provider "$2"}
+    ;;
+  visual)
+    [[ -n ${1:-} ]] || fail "usage: screen-search visual FILE.png" 2
+    run_action visual --file "$1" ${2:+--provider "$2"}
+    ;;
+  clipboard)
+    text=$(wl-paste --no-newline --type text 2>/dev/null || true)
+    [[ -n ${text//[[:space:]]/} ]] || { notify "Clipboard has no text" 󰅍; exit 11; }
+    run_action search --text "$text"
+    ;;
+  provider)
+    if [[ -n ${1:-} ]]; then
+      provider_exists "$1" || fail "unknown provider: $1 (see: screen-search providers)" 2
+      set_setting provider "$1"
+    else
+      current_provider; echo
+    fi
+    ;;
+  providers)
+    providers_list | awk -F'\t' '{ printf "%-12s %-16s %-6s %-7s %s\n", $1, $2, $3, $4, $5 }'
+    ;;
+  act)
+    [[ -n ${1:-} ]] || fail "usage: screen-search act ACTION [--file F] [--text T]" 2
+    action=$1; shift
+    run_action "$action" "$@"
+    ;;
+  *) fail "unknown command: $cmd (try --help)" 2 ;;
+esac

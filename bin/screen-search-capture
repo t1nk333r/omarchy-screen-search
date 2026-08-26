@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# Capture a screen region into private runtime storage and optionally OCR it.
+# Prints exactly one JSON line on stdout; text/paths never go anywhere else.
+#
+#   screen-search-capture --mode circle|ocr [--lang LANGS]
+#   screen-search-capture --ocr-file FILE [--lang LANGS]     (OCR an existing capture)
+#
+# Exit: 0 ok · 10 selection cancelled · 11 no text found · 12 OCR engine
+# missing · 1 other failure.
+#
+# Region + freeze come from Omarchy's own picker (hyprpicker freeze + slurp
+# with keyboard control and transform-aware monitor geometry), the tesseract
+# invocation is omarchy-capture-text's, and the temp-file lifecycle follows
+# the waydots ocr-screen-region.sh (mktemp + trap).
+set -euo pipefail
+
+PLUGIN_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$PLUGIN_DIR/lib/config.sh"
+source "$PLUGIN_DIR/lib/tmp.sh"
+
+MODE=""; OCR_FILE=""; LANGS=""
+while (($#)); do
+  case $1 in
+    --mode) MODE=$2; shift 2 ;;
+    --ocr-file) OCR_FILE=$2; shift 2 ;;
+    --lang) LANGS=$2; shift 2 ;;
+    *) fail "unknown option: $1" 2 ;;
+  esac
+done
+
+FREEZE_PID=""
+FILE=""
+KEEP_FILE=false
+cleanup() {
+  [[ -n $FREEZE_PID ]] && { kill "$FREEZE_PID" 2>/dev/null || true; }
+  [[ $KEEP_FILE == true ]] || discard_capture "$FILE"
+  return 0
+}
+trap cleanup EXIT
+
+ocr_json() {
+  local file=$1 kind=$2 langs text
+  command -v tesseract >/dev/null || exit 12
+  langs=${LANGS:-$(ocr_langs)}
+  text=$(tesseract "$file" stdout --oem 1 --psm 6 -l "$langs" --dpi 300 \
+           -c preserve_interword_spaces=1 2>/dev/null) || exit 1
+  # Trim trailing whitespace/form-feeds tesseract appends.
+  text=$(printf '%s' "$text" | sed -e 's/[[:space:]]*$//' | sed -e ':a;/^\n*$/{$d;N;ba}')
+  [[ -n ${text//[[:space:]]/} ]] || exit 11
+  jq -cn --arg kind "$kind" --arg file "$file" --arg text "$text" --arg langs "$langs" \
+    '{kind:$kind, file:$file, text:$text, langs:$langs}'
+}
+
+if [[ -n $OCR_FILE ]]; then
+  [[ -r $OCR_FILE ]] || fail "capture not found" 1
+  KEEP_FILE=true
+  ocr_json "$OCR_FILE" text
+  exit 0
+fi
+
+[[ $MODE == circle || $MODE == ocr ]] || fail "--mode circle|ocr required" 2
+
+sweep_captures
+FILE=$(new_capture_file)
+chmod 600 "$FILE"
+
+# Omarchy's picker prints the freeze PID first, then the geometry; an empty
+# geometry (Escape) is a cancel, not a failure.
+{ read -r FREEZE_PID; read -r SELECTION; } < <(omarchy-capture-region region --keep-freeze || true)
+[[ -n ${SELECTION:-} ]] || exit 10
+
+grim -g "$SELECTION" "$FILE" || exit 1
+kill "$FREEZE_PID" 2>/dev/null || true
+FREEZE_PID=""
+
+KEEP_FILE=true
+case $MODE in
+  circle)
+    jq -cn --arg file "$FILE" --arg geo "$SELECTION" '{kind:"image", file:$file, geometry:$geo}'
+    ;;
+  ocr)
+    ocr_json "$FILE" text
+    ;;
+esac

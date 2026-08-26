@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "t1nk33r.screen-search",
+  "name": "Screen Search",
+  "version": "0.1.0",
+  "author": "t1nk33r",
+  "description": "OCR and Circle to Search for anything on screen: select a region, then search, copy, translate or open it.",
+  "kinds": ["bar-widget", "overlay"],
+  "keepLoaded": true,
+  "entryPoints": {
+    "barWidget": "Panel.qml",
+    "overlay": "SearchOsd.qml"
+  },
+  "barWidget": {
+    "displayName": "Screen Search",
+    "description": "Magnifier: left click Circle to Search, middle click OCR, right click menu",
+    "category": "Utilities",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "provider": "google",
+      "translateProvider": "google",
+      "translateTarget": "",
+      "defaultMode": "circle",
+      "osdPosition": "bottom-center",
+      "osdTimeout": 0,
+      "previewSize": 160,
+      "ocrLangs": "eng"
+    },
+    "schema": [
+      { "key": "provider", "type": "string", "label": "Search provider (google, bing, brave, duckduckgo, yandex, tineye)" },
+      { "key": "translateProvider", "type": "string", "label": "Translate with (google, deepl, bing)" },
+      { "key": "translateTarget", "type": "string", "label": "Translate to (language code; empty = locale)" },
+      { "key": "defaultMode", "type": "string", "label": "Default mode (circle or ocr)" },
+      { "key": "osdPosition", "type": "string", "label": "OSD position (top-center, top-right, bottom-center, bottom-right)" },
+      { "key": "osdTimeout", "type": "number", "label": "Auto-close result after seconds (0 = never)" },
+      { "key": "previewSize", "type": "number", "label": "Thumbnail size (px)" },
+      { "key": "ocrLangs", "type": "string", "label": "OCR languages (tesseract, e.g. eng+ara)" }
+    ]
+  }
+}

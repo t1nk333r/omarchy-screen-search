@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+printf '%s' "omarchy-shell" >> "$FAKE_LOG"; for a in "$@"; do printf ' [%s]' "$a" >> "$FAKE_LOG"; done
+if [[ -p /dev/stdin || -f /dev/stdin ]]; then printf ' <stdin:%s>' "$(cat | head -c 200 | tr '\n' '|')" >> "$FAKE_LOG"; fi
+printf '\n' >> "$FAKE_LOG"

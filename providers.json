@@ -1,0 +1,37 @@
+{
+  "google": {
+    "name": "Google",
+    "text": "https://www.google.com/search?q={q}",
+    "visual": { "mode": "clipboard-upload", "url": "https://lens.google.com/upload" }
+  },
+  "bing": {
+    "name": "Bing",
+    "text": "https://www.bing.com/search?q={q}",
+    "visual": { "mode": "clipboard-upload", "url": "https://www.bing.com/visualsearch" }
+  },
+  "brave": {
+    "name": "Brave Search",
+    "text": "https://search.brave.com/search?q={q}",
+    "visual": null
+  },
+  "duckduckgo": {
+    "name": "DuckDuckGo",
+    "text": "https://duckduckgo.com/?q={q}",
+    "visual": null
+  },
+  "yandex": {
+    "name": "Yandex",
+    "text": "https://yandex.com/search/?text={q}",
+    "visual": { "mode": "clipboard-upload", "url": "https://yandex.com/images/" }
+  },
+  "tineye": {
+    "name": "TinEye",
+    "text": null,
+    "visual": { "mode": "clipboard-upload", "url": "https://tineye.com/" }
+  },
+  "_translate": {
+    "google": { "name": "Google Translate", "url": "https://translate.google.com/?sl=auto&tl={tl}&text={q}&op=translate" },
+    "deepl":  { "name": "DeepL", "url": "https://www.deepl.com/translator#auto/{tl}/{q}" },
+    "bing":   { "name": "Bing Translator", "url": "https://www.bing.com/translator?from=auto&to={tl}&text={q}" }
+  }
+}
