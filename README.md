@@ -90,3 +90,7 @@ Shared packages installed for the tool are never removed on uninstall.
 ```
 bash tests/run.sh         # fully offline; network/clipboard/browser are faked
 ```
+
+## License
+
+MIT — see [LICENSE](LICENSE).
