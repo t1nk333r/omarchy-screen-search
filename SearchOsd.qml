@@ -53,6 +53,8 @@ Item {
   function open(payloadJson) {
     var p = {}
     try { p = JSON.parse(payloadJson || "{}") } catch (e) {}
+    if (captureProc.running) captureProc.running = false
+    if (actionProc.running) actionProc.running = false
     if (opened && state === "result") discardCapture()
     mode = p.mode === "ocr" ? "ocr" : "circle"
     payload = {}; message = ""; cursor = 0; expanded = false; pickingProvider = false
