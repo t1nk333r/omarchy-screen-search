@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+printf 'hyprctl' >> "$FAKE_LOG"; for a in "$@"; do printf ' [%s]' "$a" >> "$FAKE_LOG"; done; printf '\n' >> "$FAKE_LOG"
+if [[ $1 == clients ]]; then
+  # one matching browser window unless the test asks for none
+  [[ -n ${HYPRCTL_NO_CLIENTS:-} ]] && { echo '[]'; exit 0; }
+  echo '[{"address":"0xabc123","title":"ImgOps - Image Operations","class":"chromium"}]'
+fi
+exit 0

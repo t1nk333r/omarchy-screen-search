@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+printf 'wtype' >> "$FAKE_LOG"; for a in "$@"; do printf ' [%s]' "$a" >> "$FAKE_LOG"; done; printf '\n' >> "$FAKE_LOG"

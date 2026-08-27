@@ -8,6 +8,7 @@ export FAKE_LOG="$(mktemp)"
 export SCREEN_SEARCH_TMP="$(mktemp -d)"
 export SCREEN_SEARCH_SHELL_JSON="$(mktemp --suffix=.json)"
 export PATH="$HERE/fakebin:$PATH"
+export SCREEN_SEARCH_NO_AUTOPASTE=1
 export HOME_ORIG="$HOME"
 trap 'rm -rf "$FAKE_LOG" "$SCREEN_SEARCH_TMP" "$SCREEN_SEARCH_SHELL_JSON"' EXIT
 

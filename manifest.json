@@ -29,7 +29,8 @@
       "osdTimeout": 0,
       "previewSize": 160,
       "ocrLangs": "eng",
-      "resultUi": "osd"
+      "resultUi": "osd",
+      "visualAutoPaste": true
     },
     "schema": [
       {
@@ -76,6 +77,11 @@
         "key": "ocrLangs",
         "type": "string",
         "label": "OCR languages (tesseract, e.g. eng+ara)"
+      },
+      {
+        "key": "visualAutoPaste",
+        "type": "boolean",
+        "label": "Auto-paste the image and submit on the provider page"
       }
     ]
   }

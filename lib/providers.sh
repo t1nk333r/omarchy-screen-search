@@ -45,6 +45,39 @@ open_in_browser() {
   omarchy-launch-browser "$1" >/dev/null 2>&1 || fail "browser could not be launched" 3
 }
 
+# Drive the provider page for the user: wait for the browser window that
+# belongs to $1's site, then send Ctrl+V (paste the image from the clipboard)
+# and, after the page takes the paste, Return to submit. Keystrokes are
+# targeted at that window's address via hyprctl sendshortcut, so they can
+# never land in another application. Best effort: any failure or timeout
+# leaves the user exactly where the manual flow does.
+autopaste_into_browser() {
+  [[ -n ${SCREEN_SEARCH_NO_AUTOPASTE:-} ]] && return 0
+  command -v hyprctl >/dev/null 2>&1 || return 0
+  local url=$1 host base addr="" i
+  host=${url#*://}; host=${host%%/*}; host=${host#www.}
+  base=${host%%.*}
+  for i in $(seq 1 "${SCREEN_SEARCH_AUTOPASTE_TRIES:-40}"); do
+    addr=$(hyprctl clients -j 2>/dev/null | jq -r --arg b "$base"       '[.[] | select((.title | test($b; "i")) and (.class | test("chromium|chrome|firefox|brave|edge"; "i")))][0].address // empty')
+    [[ -n $addr ]] && break
+    sleep 0.2
+  done
+  [[ -n $addr ]] || return 0
+  # Focus the page first: Chromium drops synthetic keys sent to unfocused
+  # windows. wtype speaks the virtual-keyboard protocol, so to the browser
+  # the paste is indistinguishable from real typing.
+  hyprctl dispatch focuswindow "address:$addr" >/dev/null 2>&1 || return 0
+  sleep 0.9
+  if command -v wtype >/dev/null 2>&1; then
+    wtype -M ctrl -P v -p v -m ctrl 2>/dev/null || return 0
+  else
+    hyprctl dispatch sendshortcut "CTRL,V,address:$addr" >/dev/null 2>&1 || return 0
+  fi
+  # No Return here: on ImgOps the paste opens an in-page editor whose confirm
+  # is its save button; a Return would submit the underlying URL form instead
+  # and navigate away, destroying the editor.
+}
+
 # visual_search <provider> <file>
 # The only image flow in v1 is clipboard-upload: the PNG goes to the clipboard
 # (marked sensitive so clipboard history skips it) and the provider's upload
@@ -60,6 +93,11 @@ visual_search() {
     clipboard-upload)
       wl-copy --type image/png --sensitive < "$file"
       open_in_browser "$url"
+      # Detached: the OSD must not wait on the page loading.
+      if [[ $(setting visualAutoPaste true) != false ]]; then
+        ( autopaste_into_browser "$url" ) >/dev/null 2>&1 &
+        disown 2>/dev/null || true
+      fi
       ;;
     *) fail "unsupported visual mode: $mode" 4 ;;
   esac
