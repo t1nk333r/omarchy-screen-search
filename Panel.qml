@@ -24,11 +24,11 @@ BarWidget {
   property bool providersOpen: false
 
   function close() { popupOpen = false; providersOpen = false }
+  // Always route through the CLI: it owns the resultUi decision
+  // (notification-first by default, OSD only when configured).
   function summon(mode) {
     close()
-    if (bar && bar.shell && typeof bar.shell.summon === "function")
-      bar.shell.summon(root.moduleName, JSON.stringify({ mode: mode }))
-    else Util.execArgv([root.cli, mode])
+    Util.execArgv([root.cli, mode])
   }
   function run(argv) { close(); Util.execArgv([root.cli].concat(argv)) }
 

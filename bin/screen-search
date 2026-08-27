@@ -26,15 +26,21 @@ usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'; }
 
 shell_up() { omarchy-shell shell ping >/dev/null 2>&1; }
 
-# Summon the OSD; when the shell is not running fall back to a headless
-# flow so keybinds still do something useful.
+# Default flow: capture, put the result on the clipboard, and confirm with a
+# desktop notification carrying a click-to-search action. No full-screen OSD
+# surface is involved (the overlay measurably lags the compositor); set the
+# resultUi setting to "osd" to use the interactive card instead.
 summon() {
   local mode=$1
-  if shell_up; then
+  if [[ $(setting resultUi notification) == osd ]] && shell_up; then
     omarchy-shell shell summon "$PLUGIN_ID" "$(jq -cn --arg m "$mode" '{mode:$m}')" >/dev/null
     return
   fi
-  local json rc=0
+  headless_flow "$mode"
+}
+
+headless_flow() {
+  local mode=$1 json rc=0
   json=$("$PLUGIN_DIR/bin/screen-search-capture" --mode "$mode") || rc=$?
   case $rc in
     0) ;;
@@ -43,15 +49,25 @@ summon() {
     12) notify "OCR engine unavailable" 󰴑; exit 12 ;;
     *) notify "Capture failed" 󰴑; exit 1 ;;
   esac
-  local file; file=$(jq -r .file <<<"$json")
+  local file pname
+  file=$(jq -r .file <<<"$json")
+  pname=$(provider_name "$(current_provider)")
   if [[ $mode == ocr ]]; then
     jq -rj .text <<<"$json" | wl-copy
-    notify "Copied text from selection to clipboard" 󰴑
+    discard_capture "$file"
+    # The click action re-reads the clipboard at click time, so the recognized
+    # text never lands in notification history.
+    omarchy-notification-send -g 󰴑 -t 8000 "Copied text from selection" \
+      "Click to search with $pname" \
+      --exec "$PLUGIN_DIR/bin/screen-search" clipboard >/dev/null 2>&1 || true
   else
-    wl-copy --type image/png < "$file"
-    notify "Copied selection to clipboard" 󰄄
+    wl-copy --type image/png --sensitive < "$file"
+    # The capture stays in the private runtime dir so the click action can use
+    # it; the sweeper removes it after 10 minutes.
+    omarchy-notification-send -g 󰄄 -t 8000 --image "$file" "Selection copied" \
+      "Click to search with $pname" \
+      --exec "$PLUGIN_DIR/bin/screen-search" act visual --file "$file" >/dev/null 2>&1 || true
   fi
-  discard_capture "$file"
 }
 
 cmd=${1:-}

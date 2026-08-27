@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+if [[ ${1:-} == --list-langs ]]; then printf 'List of available languages (1):\neng\n'; exit 0; fi
+printf 'HELLO WORLD\n'
