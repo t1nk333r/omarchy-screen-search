@@ -232,7 +232,10 @@ Item {
         case "copy": case "copy-image": case "save":
           root.go("done"); root.message = id === "save" ? "Saved to Pictures" : "Copied"; msgTimer.restart(); break
         case "visual":
-          root.go("done"); root.message = String(root.setting("visualAutoPaste", true)) !== "false" ? "Opening " + root.providerName + " — pasting the image for you…" : "Image copied — press Ctrl+V on the page that just opened"; hideTimer.interval = 3500; hideTimer.restart(); break
+          // Dismiss immediately: the OSD holds exclusive keyboard focus and a
+          // focus grab, which would block the browser from being focused and
+          // swallow the automated Ctrl+V. The browser opening IS the feedback.
+          root.dismiss(); break
         default:
           root.dismiss()
       }
