@@ -25,17 +25,17 @@
       "translateProvider": "google",
       "translateTarget": "",
       "defaultMode": "circle",
-      "osdPosition": "bottom-center",
+      "osdPosition": "center",
       "osdTimeout": 0,
       "previewSize": 160,
       "ocrLangs": "eng",
-      "resultUi": "notification"
+      "resultUi": "osd"
     },
     "schema": [
       {
         "key": "resultUi",
         "type": "string",
-        "label": "Show result via (notification or osd)"
+        "label": "Show result via (osd or notification)"
       },
       {
         "key": "provider",
@@ -60,7 +60,7 @@
       {
         "key": "osdPosition",
         "type": "string",
-        "label": "OSD position (top-center, top-right, bottom-center, bottom-right)"
+        "label": "OSD position (center, top-center, top-right, bottom-center, bottom-right)"
       },
       {
         "key": "osdTimeout",

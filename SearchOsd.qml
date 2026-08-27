@@ -2,6 +2,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import Quickshell.Hyprland
+import QtQuick.Effects
 import qs.Commons
 import qs.Ui
 import "Model.js" as Model
@@ -231,25 +233,45 @@ Item {
   Timer { id: msgTimer; interval: 1800; onTriggered: root.message = "" }
 
   // ---- window -------------------------------------------------------------
+  //
+  // The surface is exactly the card's size (plus shadow padding), never
+  // full-screen: a fullscreen transparent overlay forces the compositor to
+  // composite an extra 1440p layer every frame and measurably lags the
+  // desktop. An unanchored axis is centered by the layer-shell protocol, so
+  // osdPosition "center" simply anchors nothing.
 
   PanelWindow {
     id: panel
+
+    readonly property int shadowPad: Style.space(28)
+
     visible: root.opened
-    anchors { top: true; bottom: true; left: true; right: true }
     color: "transparent"
+    implicitWidth: glassCard.implicitWidth + shadowPad * 2
+    implicitHeight: glassCard.implicitHeight + shadowPad * 2
     WlrLayershell.namespace: "screen-search"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: root.interactive ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     exclusionMode: ExclusionMode.Ignore
-    // While slurp owns the pointer the hint must not eat input; once a result
-    // is up, the whole surface is live so a click outside the card dismisses.
+    anchors {
+      top: root.anchorsSpec.top === true
+      bottom: root.anchorsSpec.bottom === true
+      right: root.anchorsSpec.right === true
+    }
+    margins {
+      top: Style.space(67)
+      bottom: Style.space(67)
+      right: Style.space(67)
+    }
+    // The hint card must never eat input while slurp owns the pointer.
     mask: root.interactive ? null : emptyMask
     Region { id: emptyMask }
 
-    MouseArea {
-      anchors.fill: parent
-      enabled: root.interactive
-      onClicked: root.dismiss()
+    // Clicking anywhere outside the card dismisses it.
+    HyprlandFocusGrab {
+      active: root.interactive && root.opened
+      windows: [panel]
+      onCleared: root.dismiss()
     }
 
     PanelKeyCatcher {
@@ -271,22 +293,58 @@ Item {
       onTextKey: function(t) { root.onKey(t) }
     }
 
-    BorderSurface {
-      id: card
-      anchors.top: root.anchorsSpec.top ? parent.top : undefined
-      anchors.bottom: root.anchorsSpec.bottom ? parent.bottom : undefined
-      anchors.right: root.anchorsSpec.right ? parent.right : undefined
-      anchors.horizontalCenter: root.anchorsSpec.hcenter ? parent.horizontalCenter : undefined
-      anchors.margins: Style.space(67)
-      width: content.implicitWidth + card.borderLeft + card.borderRight + Style.spacing.popupPadding * 2
-      height: content.implicitHeight + card.borderTop + card.borderBottom + Style.spacing.popupPadding * 2
-      color: Util.alpha(Color.popups.background, 0.97)
-      borderSpec: Border.surfaceSpec("popups", "border", Color.popups.border, Math.max(1, Style.space(2)))
-      radius: Style.cornerRadius
+    // Liquid-glass card. Every color derives from the theme's popup surface
+    // tokens, so theme switches restyle it; the translucent base also picks
+    // up real backdrop blur when Hyprland blur is enabled (the installer
+    // ships a layerrule for this namespace).
+    Rectangle {
+      id: glassCard
+
+      readonly property real pad: Style.spacing.popupPadding
+      readonly property color glassInk: Color.popups.text
+
+      anchors.centerIn: parent
+      implicitWidth: content.implicitWidth + pad * 2
+      implicitHeight: content.implicitHeight + pad * 2
+      radius: Math.max(Style.cornerRadius, Style.space(16))
+      color: Util.alpha(Color.popups.background, 0.72)
+      border.width: 1
+      border.color: Util.alpha(Color.popups.border, 0.6)
+
       opacity: root.opened ? 1 : 0
       scale: root.opened ? 1 : 0.96
       Behavior on opacity { NumberAnimation { duration: 160; easing.type: Easing.OutQuad } }
       Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+
+      layer.enabled: true
+      layer.effect: MultiEffect {
+        shadowEnabled: true
+        shadowBlur: 1.0
+        shadowVerticalOffset: Style.space(5)
+        shadowColor: Util.alpha("#000000", 0.4)
+      }
+
+      // Specular sheen: bright at the top edge, falling away — the glass
+      // "catches the light" regardless of theme polarity.
+      Rectangle {
+        anchors.fill: parent
+        radius: parent.radius
+        gradient: Gradient {
+          GradientStop { position: 0.0; color: Util.alpha("#ffffff", 0.13) }
+          GradientStop { position: 0.32; color: Util.alpha("#ffffff", 0.035) }
+          GradientStop { position: 1.0; color: Util.alpha("#ffffff", 0.0) }
+        }
+      }
+
+      // Inner rim highlight, inset one pixel from the border.
+      Rectangle {
+        anchors.fill: parent
+        anchors.margins: 1
+        radius: parent.radius - 1
+        color: "transparent"
+        border.width: 1
+        border.color: Util.alpha("#ffffff", 0.16)
+      }
 
       MouseArea { anchors.fill: parent; onClicked: function(m) { m.accepted = true } }
 

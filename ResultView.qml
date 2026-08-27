@@ -61,7 +61,7 @@ Item {
           anchors.fill: parent; anchors.margins: Style.space(2)
           fillMode: Image.PreserveAspectFit
           asynchronous: true; cache: false
-          source: osd.payload.file ? "file://" + osd.payload.file : ""
+          source: osd.payload.kind === "image" && osd.payload.file ? "file://" + osd.payload.file : ""
         }
       }
       Column {

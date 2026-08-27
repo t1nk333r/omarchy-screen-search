@@ -78,6 +78,10 @@ hl.unbind("SUPER + CTRL + PRINT")
 o.bind("SUPER + CTRL + PRINT", "OCR screen region", "screen-search ocr")
 o.bind("SUPER + SHIFT + PRINT", "Circle to Search", "screen-search circle")
 o.bind("SUPER + CTRL + ALT + PRINT", "Search clipboard text", "screen-search clipboard")
+-- The OSD card is translucent; with Hyprland blur enabled this rule gives it
+-- real frosted glass. Harmless while blur is off. no_anim matches the other
+-- Omarchy shell layers.
+hl.layer_rule({ match = { namespace = "screen-search" }, blur = true, ignore_alpha = 0.3, no_anim = true, animation = "none" })
 -- <<< screen-search <<<
 LUA
   mv -- "$tmp" "$BINDINGS"

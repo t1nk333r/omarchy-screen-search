@@ -67,12 +67,15 @@ function findEntry(config, id) {
   return {}
 }
 
+// Layer-shell anchor booleans for the OSD window. An axis with no anchored
+// edge is centered by the compositor, so "center" returns no anchors at all.
 function anchorsFor(position) {
-  switch (String(position || "bottom-center")) {
-    case "top-center": return { top: true, hcenter: true }
+  switch (String(position || "center")) {
+    case "top-center": return { top: true }
     case "top-right": return { top: true, right: true }
+    case "bottom-center": return { bottom: true }
     case "bottom-right": return { bottom: true, right: true }
-    default: return { bottom: true, hcenter: true }
+    default: return {}
   }
 }
 

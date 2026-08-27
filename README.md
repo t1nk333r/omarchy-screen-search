@@ -5,11 +5,14 @@ that adds OCR and Circle-to-Search: select a screen region, then search, copy,
 translate, open a link, decode a QR, or reverse-image-search it — from a bar
 magnifier, a keybind, or the CLI.
 
-After a capture, the result goes to your **clipboard** and a **desktop
-notification** confirms it — click the notification to search. Prefer the
-interactive on-screen card instead? `omarchy bar set t1nk33r.screen-search
-resultUi osd` (the card is a full-screen overlay and can cost compositor
-frames on busy scenes; notification is the default).
+After a capture, a **liquid-glass result card** appears centered on screen
+(theme-driven translucency; enable Hyprland blur for real frosted glass —
+the installer ships the layer rule). The surface is card-sized, not
+full-screen, so it costs the compositor nothing. Prefer a fire-and-forget
+flow? `omarchy bar set t1nk33r.screen-search resultUi notification` puts the
+result on the clipboard with a click-to-search desktop notification instead.
+Position via `osdPosition` (center · top-center · top-right · bottom-center ·
+bottom-right).
 
 ## Modes
 
