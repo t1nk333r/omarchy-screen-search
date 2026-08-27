@@ -260,7 +260,9 @@ Item {
     }
     margins {
       top: Style.space(67)
-      bottom: Style.space(67)
+      // Android-toast placement: the card floats at ~75% of the screen's
+      // height, i.e. a quarter of the screen above the bottom edge.
+      bottom: panel.screen ? Math.round(panel.screen.height * 0.25) : Style.space(180)
       right: Style.space(67)
     }
     // The hint card must never eat input while slurp owns the pointer.
@@ -306,8 +308,8 @@ Item {
       anchors.centerIn: parent
       implicitWidth: content.implicitWidth + pad * 2
       implicitHeight: content.implicitHeight + pad * 2
-      radius: Math.max(Style.cornerRadius, Style.space(16))
-      color: Util.alpha(Color.popups.background, 0.72)
+      radius: Math.max(Style.cornerRadius, Style.space(22))
+      color: Util.alpha(Color.popups.background, 0.92)
       border.width: 1
       border.color: Util.alpha(Color.popups.border, 0.6)
 
@@ -330,8 +332,8 @@ Item {
         anchors.fill: parent
         radius: parent.radius
         gradient: Gradient {
-          GradientStop { position: 0.0; color: Util.alpha("#ffffff", 0.13) }
-          GradientStop { position: 0.32; color: Util.alpha("#ffffff", 0.035) }
+          GradientStop { position: 0.0; color: Util.alpha("#ffffff", 0.08) }
+          GradientStop { position: 0.32; color: Util.alpha("#ffffff", 0.02) }
           GradientStop { position: 1.0; color: Util.alpha("#ffffff", 0.0) }
         }
       }

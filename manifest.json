@@ -25,7 +25,7 @@
       "translateProvider": "google",
       "translateTarget": "",
       "defaultMode": "circle",
-      "osdPosition": "center",
+      "osdPosition": "bottom-center",
       "osdTimeout": 0,
       "previewSize": 160,
       "ocrLangs": "eng",
