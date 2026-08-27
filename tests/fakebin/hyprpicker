@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# stand-in freeze: sleeps, killable, records invocation
+printf 'hyprpicker' >> "$FAKE_LOG"; for a in "$@"; do printf ' [%s]' "$a" >> "$FAKE_LOG"; done; printf '\n' >> "$FAKE_LOG"
+exec sleep 300

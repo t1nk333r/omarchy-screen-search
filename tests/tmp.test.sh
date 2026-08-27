@@ -10,13 +10,14 @@ f=$(new_capture_file); printf 'PNG' > "$f"
 OMARCHY_SCREENSHOT_DIR="$SCREEN_SEARCH_TMP/pics" "$S" act save --file "$f"
 ls "$SCREEN_SEARCH_TMP"/pics/screenshot-*.png >/dev/null 2>&1 && ok || bad "save writes screenshot"
 [[ -f $f ]] && ok || bad "save keeps the capture for further actions"
-# capture script: cancelled selection → 10, file cleaned
-cat > "$PLUGIN_DIR/tests/fakebin/omarchy-capture-region" <<'X'
-#!/usr/bin/env bash
-echo 12345; echo ""; exit 1
-X
-chmod +x "$PLUGIN_DIR/tests/fakebin/omarchy-capture-region"
+# capture script: cancelled selection (empty slurp) → 10, no capture left,
+# and the fake freeze is reaped.
 before=$(ls "$SCREEN_SEARCH_TMP" | wc -l)
 "$PLUGIN_DIR/bin/screen-search-capture" --mode circle >/dev/null 2>&1; assert_rc $? 10 "cancel exits 10"
 assert_eq "$(ls "$SCREEN_SEARCH_TMP" | wc -l)" "$before" "cancel leaves no capture file"
-rm -f "$PLUGIN_DIR/tests/fakebin/omarchy-capture-region"
+# a real selection produces JSON and keeps the file; freeze is killed after grim
+out=$(SLURP_GEOM="10,10 100x100" "$PLUGIN_DIR/bin/screen-search-capture" --mode circle 2>/dev/null); rc=$?
+assert_rc "$rc" 0 "selection exits 0"
+[[ $(jq -r .kind <<<"$out") == image ]] && ok || bad "selection returns image kind"
+cf=$(jq -r .file <<<"$out"); [[ -f $cf ]] && ok || bad "capture file kept after selection"
+

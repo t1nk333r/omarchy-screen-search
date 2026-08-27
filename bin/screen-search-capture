@@ -29,14 +29,31 @@ while (($#)); do
 done
 
 FREEZE_PID=""
+SLURP_PID=""
 FILE=""
 KEEP_FILE=false
+SEL_FILE=""
+# The freeze (hyprpicker) and the region picker (slurp) are killed by PID with
+# SIGKILL escalation. hyprpicker detaches into its own process group and does
+# not reliably exit on SIGTERM, so a group kill or a lone TERM would leave the
+# screen frozen when the shell drops this process (hide / reload / re-summon).
+kill_hard() {
+  local pid=$1
+  [[ -n $pid ]] || return 0
+  kill -TERM "$pid" 2>/dev/null || return 0
+  for _ in 1 2 3; do kill -0 "$pid" 2>/dev/null || return 0; sleep 0.05; done
+  kill -KILL "$pid" 2>/dev/null || true
+}
 cleanup() {
-  [[ -n $FREEZE_PID ]] && { kill "$FREEZE_PID" 2>/dev/null || true; }
+  kill_hard "$SLURP_PID"
+  kill_hard "$FREEZE_PID"
+  [[ -n $SEL_FILE ]] && rm -f -- "$SEL_FILE"
   [[ $KEEP_FILE == true ]] || discard_capture "$FILE"
   return 0
 }
 trap cleanup EXIT
+# On a signal, exit so the EXIT trap tears the picker down.
+trap 'exit 143' TERM INT HUP
 
 ocr_json() {
   local file=$1 kind=$2 langs text
@@ -64,13 +81,26 @@ sweep_captures
 FILE=$(new_capture_file)
 chmod 600 "$FILE"
 
-# Omarchy's picker prints the freeze PID first, then the geometry; an empty
-# geometry (Escape) is a cancel, not a failure.
-{ read -r FREEZE_PID; read -r SELECTION; } < <(omarchy-capture-region region --keep-freeze || true)
+# Freeze the screen so grim captures what the user selected, not content that
+# shifted during selection. We own both PIDs from the start (unlike
+# --keep-freeze, whose detached freeze can't be reached mid-selection), so
+# cleanup can always tear the picker down. Mirrors omarchy-capture-text.
+hyprpicker -r -z >/dev/null 2>&1 &
+FREEZE_PID=$!
+sleep 0.1
+
+SEL_FILE=$(mktemp)
+slurp >"$SEL_FILE" 2>/dev/null &
+SLURP_PID=$!
+wait "$SLURP_PID" 2>/dev/null || true
+SLURP_PID=""
+SELECTION=$(cat "$SEL_FILE" 2>/dev/null)
+rm -f -- "$SEL_FILE"; SEL_FILE=""
+# Escape / cancel yields an empty selection — not a failure.
 [[ -n ${SELECTION:-} ]] || exit 10
 
 grim -g "$SELECTION" "$FILE" || exit 1
-kill "$FREEZE_PID" 2>/dev/null || true
+kill_hard "$FREEZE_PID"
 FREEZE_PID=""
 
 KEEP_FILE=true

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# write a tiny valid-ish file to the requested output path (last arg)
+printf 'grim' >> "$FAKE_LOG"; for a in "$@"; do printf ' [%s]' "$a" >> "$FAKE_LOG"; done; printf '\n' >> "$FAKE_LOG"
+out=${!#}; [[ $out != - ]] && printf 'PNGDATA' > "$out"

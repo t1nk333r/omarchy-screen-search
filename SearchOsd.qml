@@ -73,6 +73,8 @@ Item {
   }
 
   function close() {
+    if (captureProc.running) captureProc.running = false   // terminates the picker group
+    if (actionProc.running) actionProc.running = false
     discardCapture()
     opened = false
     state = "closed"

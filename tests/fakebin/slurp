@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# cancel by default (empty output); set SLURP_GEOM to simulate a selection
+[[ -n ${SLURP_GEOM:-} ]] && printf '%s' "$SLURP_GEOM"
+exit 0
