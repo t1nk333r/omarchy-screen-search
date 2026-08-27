@@ -41,7 +41,7 @@ png="$SCREEN_SEARCH_TMP/capture-test.png"; printf 'PNG' > "$png"
 write_shell_json '{"provider":"google"}'
 reset_log; "$S" visual "$png"; assert_rc $? 0 "visual exits 0"
 assert_grep "$FAKE_LOG" 'wl-copy \[--type\] \[image/png\] \[--sensitive\] <stdin:PNG>' "image copied sensitive"
-assert_grep "$FAKE_LOG" 'omarchy-launch-browser \[https://lens.google.com/upload\]' "lens upload page opened"
+assert_grep "$FAKE_LOG" 'omarchy-launch-browser \[https://imgops.com/\]' "visual upload page opened"
 assert_nogrep "$FAKE_LOG" 'curl' "no upload performed"
 reset_log; "$S" visual "$png" brave >/dev/null 2>&1; assert_rc $? 4 "brave visual → 4"
 assert_nogrep "$FAKE_LOG" 'wl-copy' "no clipboard write when unsupported"

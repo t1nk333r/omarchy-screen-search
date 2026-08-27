@@ -220,7 +220,7 @@ Item {
         case "copy": case "copy-image": case "save":
           root.go("done"); root.message = id === "save" ? "Saved to Pictures" : "Copied"; msgTimer.restart(); break
         case "visual":
-          root.go("done"); root.message = "Image copied — paste (Ctrl+V) on the " + root.providerName + " page"; hideTimer.interval = 3500; hideTimer.restart(); break
+          root.go("done"); root.message = "Image copied — press Ctrl+V on the page that just opened"; hideTimer.interval = 3500; hideTimer.restart(); break
         default:
           root.dismiss()
       }

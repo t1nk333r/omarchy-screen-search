@@ -50,8 +50,8 @@ screen-search providers       # list providers and their capabilities
 
 | Provider | Text | Visual |
 |----------|:----:|:------:|
-| Google | ✓ | ✓ (Lens) |
-| Bing | ✓ | ✓ |
+| Google | ✓ | ✓ (via ImgOps) |
+| Bing | ✓ | ✓ (via ImgOps) |
 | Yandex | ✓ | ✓ |
 | Brave | ✓ | — |
 | DuckDuckGo | ✓ | — |

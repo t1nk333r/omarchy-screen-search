@@ -2,12 +2,18 @@
   "google": {
     "name": "Google",
     "text": "https://www.google.com/search?q={q}",
-    "visual": { "mode": "clipboard-upload", "url": "https://lens.google.com/upload" }
+    "visual": {
+      "mode": "clipboard-upload",
+      "url": "https://imgops.com/"
+    }
   },
   "bing": {
     "name": "Bing",
     "text": "https://www.bing.com/search?q={q}",
-    "visual": { "mode": "clipboard-upload", "url": "https://www.bing.com/visualsearch" }
+    "visual": {
+      "mode": "clipboard-upload",
+      "url": "https://imgops.com/"
+    }
   },
   "brave": {
     "name": "Brave Search",
@@ -22,16 +28,31 @@
   "yandex": {
     "name": "Yandex",
     "text": "https://yandex.com/search/?text={q}",
-    "visual": { "mode": "clipboard-upload", "url": "https://yandex.com/images/" }
+    "visual": {
+      "mode": "clipboard-upload",
+      "url": "https://yandex.com/images/"
+    }
   },
   "tineye": {
     "name": "TinEye",
     "text": null,
-    "visual": { "mode": "clipboard-upload", "url": "https://tineye.com/" }
+    "visual": {
+      "mode": "clipboard-upload",
+      "url": "https://tineye.com/"
+    }
   },
   "_translate": {
-    "google": { "name": "Google Translate", "url": "https://translate.google.com/?sl=auto&tl={tl}&text={q}&op=translate" },
-    "deepl":  { "name": "DeepL", "url": "https://www.deepl.com/translator#auto/{tl}/{q}" },
-    "bing":   { "name": "Bing Translator", "url": "https://www.bing.com/translator?from=auto&to={tl}&text={q}" }
+    "google": {
+      "name": "Google Translate",
+      "url": "https://translate.google.com/?sl=auto&tl={tl}&text={q}&op=translate"
+    },
+    "deepl": {
+      "name": "DeepL",
+      "url": "https://www.deepl.com/translator#auto/{tl}/{q}"
+    },
+    "bing": {
+      "name": "Bing Translator",
+      "url": "https://www.bing.com/translator?from=auto&to={tl}&text={q}"
+    }
   }
 }
