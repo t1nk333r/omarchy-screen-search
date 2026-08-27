@@ -46,6 +46,16 @@ Item {
   readonly property var anchorsSpec: Model.anchorsFor(setting("osdPosition", "bottom-center"))
   readonly property bool interactive: state === "result" || state === "failed"
 
+  // The outside-click grab must not arm while slurp's own grab is still
+  // tearing down after the drag release — Hyprland clears a grab established
+  // during that churn immediately, which dismissed the card the instant it
+  // appeared. Arm it shortly after the card settles instead.
+  property bool grabArmed: false
+  onInteractiveChanged: {
+    if (interactive) { grabArmed = false; grabArmTimer.restart() }
+    else { grabArmTimer.stop(); grabArmed = false }
+  }
+
   function go(event) {
     var next = Model.transition(state, event)
     if (next) state = next
@@ -229,6 +239,7 @@ Item {
     }
   }
 
+  Timer { id: grabArmTimer; interval: 350; onTriggered: root.grabArmed = true }
   Timer { id: hideTimer; interval: 2500; onTriggered: root.dismiss() }
   Timer { id: msgTimer; interval: 1800; onTriggered: root.message = "" }
 
@@ -269,9 +280,10 @@ Item {
     mask: root.interactive ? null : emptyMask
     Region { id: emptyMask }
 
-    // Clicking anywhere outside the card dismisses it.
+    // Clicking anywhere outside the card dismisses it (armed slightly after
+    // the card appears; see grabArmed above).
     HyprlandFocusGrab {
-      active: root.interactive && root.opened
+      active: root.grabArmed && root.opened
       windows: [panel]
       onCleared: root.dismiss()
     }
