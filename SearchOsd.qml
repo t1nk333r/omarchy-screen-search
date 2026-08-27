@@ -271,9 +271,9 @@ Item {
     }
     margins {
       top: Style.space(67)
-      // Android-toast placement: the card floats at ~75% of the screen's
-      // height, i.e. a quarter of the screen above the bottom edge.
-      bottom: panel.screen ? Math.round(panel.screen.height * 0.25) : Style.space(180)
+      // Android-toast placement: the card floats at ~85% of the screen's
+      // height, i.e. 15% of the screen above the bottom edge.
+      bottom: panel.screen ? Math.round(panel.screen.height * 0.15) : Style.space(120)
       right: Style.space(67)
     }
     // The hint card must never eat input while slurp owns the pointer.
