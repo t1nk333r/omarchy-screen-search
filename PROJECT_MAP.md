@@ -50,14 +50,9 @@ Config single source of truth: inline entry in `~/.config/omarchy/shell.json`
 
 ## [ORPHANS & PENDING]
 
+(empty — all M1–M6 items closed 2026-08-28)
 
-- Plans 003–006 were stamped @55674c5; HEAD has drifted (imgops reroute, autopaste,
-  toast OSD, instant visual dismiss). Reconcile each plan's excerpts at milestone start.
-- Plan 005: `scheduleHide` spec predates the instant-dismiss visual path — visual case
-  no longer writes hideTimer; adapt scope (guard + reset still needed).
-- 002 host order DECIDED by probe (2026-08-28): 0x0.st unreachable (timeout) and
-  litterbox 403 from this network; uguu.se 200. M6 default host = uguu (3 h fixed
-  expiry, no early delete — consent text must say so); 0x0/litterbox stay as
-  config choices for networks where they work.
-- Doctor is NEW scope (not in plans/): lives as `screen-search doctor` + CI job in M5.
-- DECIDED: autopaste/ImgOps stays as the clipboard-mode flow (default); public-url is opt-in.
+Decisions of record: uguu.se is the default upload host (0x0.st unreachable /
+litterbox 403 from this network at probe time); autopaste/ImgOps paste flow
+stays as the default clipboard visual mode; public-url is opt-in with a
+consent card on every upload, no remember-me.
