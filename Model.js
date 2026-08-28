@@ -26,7 +26,7 @@ var PHONE_RE = /(?:\+?\d[\d\s().-]{7,}\d)/g
 
 function detect(text) {
   var t = String(text || "")
-  var urls = t.match(URL_RE) || []
+  var urls = (t.match(URL_RE) || []).map(function(u) { return u.replace(/[.,;:!?'"\u2019]+$/, "") })
   var emails = t.match(EMAIL_RE) || []
   var phones = (t.match(PHONE_RE) || []).filter(function(p) { return p.replace(/\D/g, "").length >= 8 })
   return { urls: urls, emails: emails, phones: phones }

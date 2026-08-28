@@ -51,7 +51,9 @@ for (const [s, e] of [["idle","done"],["result","captured"],["processing","act"]
 // ---- detect ------------------------------------------------------------
 eq(M.detect("see https://example.com/a?b=c ok").urls, ["https://example.com/a?b=c"], "detect url")
 // CURRENT behavior: trailing punctuation is retained (plan 006 will strip it).
-eq(M.detect("go to https://example.com/page. now").urls, ["https://example.com/page."], "detect url trailing dot (current behavior; changes in plan 006)")
+eq(M.detect("go to https://example.com/page. now").urls, ["https://example.com/page"], "trailing dot stripped")
+eq(M.detect("see https://e.com/x, and https://e.com/y!").urls, ["https://e.com/x", "https://e.com/y"], "trailing comma/bang stripped")
+eq(M.detect("https://a.b/c.html here").urls, ["https://a.b/c.html"], "internal dot untouched")
 eq(M.detect("(https://a.b/c)").urls, ["https://a.b/c"], "detect url excludes parens")
 eq(M.detect("mail me a.user+x@example.co.uk today").emails, ["a.user+x@example.co.uk"], "detect email")
 eq(M.detect("call +1 415 555 0132 now").phones.length, 1, "detect phone")
