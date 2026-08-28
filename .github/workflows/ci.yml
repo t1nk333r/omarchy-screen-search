@@ -1,0 +1,20 @@
+name: ci
+on:
+  push: { branches: [master] }
+  pull_request:
+  schedule:
+    - cron: '17 6 * * 1'   # weekly: catches provider-endpoint rot via doctor
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: sudo apt-get update && sudo apt-get install -y jq shellcheck
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Offline test suite
+        run: bash tests/run.sh
+      - name: Provider endpoint health (network)
+        if: github.event_name == 'schedule'
+        run: bin/screen-search-doctor

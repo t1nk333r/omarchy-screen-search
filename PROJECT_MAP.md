@@ -44,10 +44,12 @@ Config single source of truth: inline entry in `~/.config/omarchy/shell.json`
 | M2 | 004 providers --json | DONE: json=6, zero QML regexes, human output unchanged, overlay+bar live |
 | M3 | 005 OSD lifecycle | DONE: seq guard + scheduleHide; double-summon→1 picker, clean teardown |
 | M4 | 006 hardening sweep | DONE: 5 scoped commits; 154 assertions; exit registry adds 13 |
-| M5 | 007 tooling + doctor | DONE: shellcheck clean+gated, CI w/ weekly doctor, CLAUDE.md, .gitignore |
-| M6 | 002 public-url visual search | consent card on EVERY upload (no remember-me); upload→uploadbyurl→results in 1 action; file deleted after search; `act visual` sends nothing without consent (strace: 0 connects) |
+| M5 | 007 tooling + doctor | DONE (for real this run): shellcheck clean+gated, CI file present, CLAUDE.md, doctor |
+| M6 | 002 public-url visual search | backend DONE (consent gate, uguu/0x0/litterbox adapters, exit 5/6, 184 tests); QML consent card PENDING |
 
 ## [ORPHANS & PENDING]
+
+- M6 remaining: QML consent card (confirmUpload state) + live end-to-end + README update.
 
 - Plans 003–006 were stamped @55674c5; HEAD has drifted (imgops reroute, autopaste,
   toast OSD, instant visual dismiss). Reconcile each plan's excerpts at milestone start.
