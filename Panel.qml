@@ -12,7 +12,7 @@ BarWidget {
   id: root
   moduleName: "t1nk33r.screen-search"
 
-  readonly property string pluginDir: Qt.resolvedUrl(".").toString().replace(/^file:\/\//, "").replace(/\/$/, "")
+  readonly property string pluginDir: Model.pluginDirFromUrl(Qt.resolvedUrl("."))
   readonly property string cli: pluginDir + "/bin/screen-search"
   readonly property string provider: setting("provider", "google")
   property var providers: []

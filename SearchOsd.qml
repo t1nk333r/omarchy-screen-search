@@ -18,7 +18,7 @@ Item {
   property var manifest: null
 
   readonly property string pluginId: manifest && manifest.id ? manifest.id : "t1nk33r.screen-search"
-  readonly property string pluginDir: Qt.resolvedUrl(".").toString().replace(/^file:\/\//, "").replace(/\/$/, "")
+  readonly property string pluginDir: Model.pluginDirFromUrl(Qt.resolvedUrl("."))
   readonly property string cli: pluginDir + "/bin/screen-search"
 
   // Settings come from the same shell.json entry the bar widget persists to.

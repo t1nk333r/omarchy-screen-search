@@ -11,7 +11,8 @@ new Function("exports", src + `
   exports.transition = transition; exports.detect = detect;
   exports.actionsFor = actionsFor; exports.findEntry = findEntry;
   exports.anchorsFor = anchorsFor; exports.summarize = summarize;
-  exports.messageForExit = messageForExit;`)(M)
+  exports.messageForExit = messageForExit;
+  exports.pluginDirFromUrl = pluginDirFromUrl;`)(M)
 
 let pass = 0, fail = 0
 function eq(got, want, label) {
@@ -110,6 +111,9 @@ eq(M.messageForExit(11, "qr"), "No QR code found", "exit 11 qr")
 eq(M.messageForExit(11, "ocr"), "No text detected", "exit 11 ocr")
 eq(M.messageForExit(13, "qr"), "QR decoder not installed", "exit 13")
 eq(M.messageForExit(143, "capture"), "Something went wrong", "exit unknown")
+
+eq(M.pluginDirFromUrl("file:///home/u/x/"), "/home/u/x", "pluginDirFromUrl strips scheme+slash")
+eq(M.pluginDirFromUrl("/already/plain"), "/already/plain", "pluginDirFromUrl passthrough")
 
 console.log(`model.test: ${pass} passed, ${fail} failed`)
 process.exit(fail === 0 ? 0 : 1)

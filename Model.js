@@ -69,6 +69,11 @@ function findEntry(config, id) {
 
 // Layer-shell anchor booleans for the OSD window. An axis with no anchored
 // edge is centered by the compositor, so "center" returns no anchors at all.
+// Filesystem path of the plugin dir from a QML context URL ("file://…/").
+function pluginDirFromUrl(u) {
+  return String(u).replace(/^file:\/\//, "").replace(/\/$/, "")
+}
+
 function anchorsFor(position) {
   switch (String(position || "center")) {
     case "top-center": return { top: true }
