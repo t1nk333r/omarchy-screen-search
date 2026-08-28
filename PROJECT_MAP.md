@@ -21,7 +21,8 @@ keybind / bar 󰍉 / CLI
   → actions via `screen-search act …` (lib/actions.sh → lib/providers.sh, providers.json)
       text: search|translate|open-url|copy   image: visual|ocr|save|qr|copy-image
   → visual: clipboard-upload mode = wl-copy + provider page + autopaste (wtype)
-    [M6 adds: public-url mode = consent card → ephemeral host upload → uploadbyurl link]
+    public-url mode (opt-in) = consent card → ephemeral upload → search-by-URL link
+    image card actions: Search <provider> · ImgOps (dedicated button, raw-prefix URL) · OCR · …
 ```
 
 Config single source of truth: inline entry in `~/.config/omarchy/shell.json`

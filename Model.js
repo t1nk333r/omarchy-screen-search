@@ -45,6 +45,7 @@ function actionsFor(payload, providerName, caps) {
     list.push({ id: "copy-close", label: "Copy & close", key: "x" })
   } else if (payload.kind === "image") {
     if (caps.visual) list.push({ id: "visual", label: "Search " + providerName, key: "s", def: true })
+    list.push({ id: "imgops", label: "ImgOps", key: "i" })
     list.push({ id: "ocr", label: "OCR", key: "o", def: !caps.visual })
     list.push({ id: "translate-image", label: "Translate", key: "t" })
     list.push({ id: "copy-image", label: "Copy", key: "c" })

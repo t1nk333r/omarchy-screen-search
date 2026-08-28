@@ -138,6 +138,7 @@ visual_search_confirmed() {
   [[ -n ${url:-} ]] || fail "upload failed" 5
   enc=$(urlencode "$url")
   target=${tpl//\{u\}/$enc}
+  target=${target//\{raw\}/$url}
   if ! omarchy-launch-browser "$target" >/dev/null 2>&1; then
     delete_ephemeral "$host" "$url" "$token"
     fail "browser could not be launched" 3

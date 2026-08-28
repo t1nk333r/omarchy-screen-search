@@ -40,6 +40,7 @@ Item {
   property bool pickingProvider: false
   property bool confirmingUpload: false
   property var consentInfo: null
+  property string pendingVisualProvider: ""
   property int pickerCursor: 0
   property var providers: []
   property var caps: ({ text: true, visual: true })
@@ -76,7 +77,7 @@ Item {
     if (opened && state === "result") discardCapture()
     mode = p.mode === "ocr" ? "ocr" : "circle"
     payload = {}; message = ""; cursor = 0; expanded = false; pickingProvider = false
-    confirmingUpload = false; consentInfo = null
+    confirmingUpload = false; consentInfo = null; pendingVisualProvider = ""
     state = "idle"; go("start")
     busyLabel = mode === "ocr" ? "Select text on screen…" : "Select something on screen…"
     opened = true
@@ -133,8 +134,11 @@ Item {
       case "search":      args = args.concat(["search", "--text", t]); break
       case "translate":   args = args.concat(["translate", "--text", t]); break
       case "open-url":    args = args.concat(["open-url", "--text", a.arg]); break
-      case "visual":      args = args.concat(["visual", "--file", f]); if (extra) args = args.concat(["--provider", extra]); break
-      case "visual-confirmed": args = args.concat(["visual-confirmed", "--file", f]); break
+      case "imgops":      extra = "imgops"; id = "visual"; // fall through to visual with a forced provider
+      case "visual":      root.pendingVisualProvider = extra || ""
+                          args = args.concat(["visual", "--file", f]); if (extra) args = args.concat(["--provider", extra]); break
+      case "visual-confirmed": args = args.concat(["visual-confirmed", "--file", f])
+                          if (root.pendingVisualProvider) args = args.concat(["--provider", root.pendingVisualProvider]); break
       case "copy-image":  args = args.concat(["copy-image", "--file", f]); break
       case "save":        args = args.concat(["save", "--file", f]); break
       case "ocr":         args = args.concat(["ocr", "--file", f]); break

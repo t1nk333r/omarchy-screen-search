@@ -45,6 +45,15 @@
     },
     "visualUrl": "https://tineye.com/search?url={u}"
   },
+  "imgops": {
+    "name": "ImgOps",
+    "text": null,
+    "visual": {
+      "mode": "clipboard-upload",
+      "url": "https://imgops.com/"
+    },
+    "visualUrl": "https://imgops.com/{raw}"
+  },
   "_translate": {
     "google": {
       "name": "Google Translate",

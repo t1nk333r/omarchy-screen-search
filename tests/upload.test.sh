@@ -38,6 +38,13 @@ assert_rc $? 0 "0x0 confirmed exits 0"
 assert_grep "$FAKE_LOG" 'curl .*\[secret=\]' "0x0 secret flag"
 assert_grep "$FAKE_LOG" 'curl .*\[token=tok123\] \[-F\] \[delete=\]' "0x0 early delete uses token"
 
+# imgops confirmed path uses the raw (unencoded) prefix form
+write_shell_json '{"provider":"google","visualMode":"public-url","uploadHost":"uguu"}'
+reset_log
+SCREEN_SEARCH_DELETE_DELAY=0 PATH="$UP_FAKE:$PATH" "$S" act visual-confirmed --file "$png" --provider imgops
+assert_rc $? 0 "imgops confirmed exits 0"
+assert_grep "$FAKE_LOG" 'omarchy-launch-browser \[https://imgops.com/https://n.uguu.se/abcdWXYZ.png\]' "imgops raw-prefix url"
+
 # provider without visualUrl → 4 before any upload
 write_shell_json '{"provider":"brave","visualMode":"public-url"}'
 reset_log

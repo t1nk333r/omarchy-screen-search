@@ -72,7 +72,7 @@ ok(a.some(x => x.id === "open-url" && x.arg === "https://e.com"), "url adds open
 a = M.actionsFor({ kind: "text", text: "t" }, "TinEye", { text: false, visual: true })
 ok(!a.some(x => x.id === "search"), "no text search without caps.text")
 a = M.actionsFor({ kind: "image", file: "/f" }, "Google", capsAll)
-eq(a.map(x => x.id), ["visual", "ocr", "translate-image", "copy-image", "save", "qr"], "image action set")
+eq(a.map(x => x.id), ["visual", "imgops", "ocr", "translate-image", "copy-image", "save", "qr"], "image action set")
 ok(a[0].def === true, "image default is visual when capable")
 a = M.actionsFor({ kind: "image", file: "/f" }, "Brave", { text: true, visual: false })
 ok(!a.some(x => x.id === "visual"), "no visual without caps.visual")
