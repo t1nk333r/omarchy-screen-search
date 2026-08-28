@@ -21,9 +21,9 @@ source "$PLUGIN_DIR/lib/tmp.sh"
 MODE=""; OCR_FILE=""; LANGS=""
 while (($#)); do
   case $1 in
-    --mode) MODE=$2; shift 2 ;;
-    --ocr-file) OCR_FILE=$2; shift 2 ;;
-    --lang) LANGS=$2; shift 2 ;;
+    --mode) [[ $# -ge 2 ]] || fail "missing value for --mode" 2; MODE=$2; shift 2 ;;
+    --ocr-file) [[ $# -ge 2 ]] || fail "missing value for --ocr-file" 2; OCR_FILE=$2; shift 2 ;;
+    --lang) [[ $# -ge 2 ]] || fail "missing value for --lang" 2; LANGS=$2; shift 2 ;;
     *) fail "unknown option: $1" 2 ;;
   esac
 done

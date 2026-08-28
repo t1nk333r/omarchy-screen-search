@@ -68,3 +68,7 @@ jq -e '[.[]|select(.id=="tineye")][0] | .text==false and .visual==true' <<<"$out
 write_shell_json '{"provider":"bing"}'
 "$S" providers --json | jq -e '[.[]|select(.current)][0].id=="bing"' >/dev/null && ok || bad "current follows setting"
 write_shell_json '{}'
+
+# arity: a flag with no value is a clean usage error, not an unbound-variable abort
+reset_log; "$S" act copy --text >/dev/null 2>&1; assert_rc $? 2 "missing option value exits 2"
+"$S" act copy --text 2>&1 | /usr/bin/grep -q 'unbound' && bad "unbound variable leaked" || ok

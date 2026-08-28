@@ -19,10 +19,10 @@ run_action() {
   local file="" text="" provider="" lang=""
   while (($#)); do
     case $1 in
-      --file) file=$2; shift 2 ;;
-      --text) text=$2; shift 2 ;;
-      --provider) provider=$2; shift 2 ;;
-      --lang) lang=$2; shift 2 ;;
+      --file) [[ $# -ge 2 ]] || fail "missing value for --file" 2; file=$2; shift 2 ;;
+      --text) [[ $# -ge 2 ]] || fail "missing value for --text" 2; text=$2; shift 2 ;;
+      --provider) [[ $# -ge 2 ]] || fail "missing value for --provider" 2; provider=$2; shift 2 ;;
+      --lang) [[ $# -ge 2 ]] || fail "missing value for --lang" 2; lang=$2; shift 2 ;;
       *) fail "unknown option: $1" 2 ;;
     esac
   done
