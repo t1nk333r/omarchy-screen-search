@@ -93,6 +93,7 @@ function messageForExit(code, action) {
     case 4: return "Not supported by this provider"
     case 11: return action === "qr" ? "No QR code found" : "No text detected"
     case 12: return "OCR engine unavailable"
+    case 13: return "QR decoder not installed"
     default: return "Something went wrong"
   }
 }

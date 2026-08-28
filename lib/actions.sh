@@ -68,7 +68,7 @@ run_action() {
       ;;
     qr)
       [[ -r $file ]] || fail "capture not found" 1
-      command -v zbarimg >/dev/null || fail "zbar not installed" 12
+      command -v zbarimg >/dev/null || fail "zbar not installed" 13
       local result
       result=$(zbarimg -q --raw -Sdisable -Sqrcode.enable "$file" 2>/dev/null) || true
       [[ -n $result ]] || fail "no QR code found" 11

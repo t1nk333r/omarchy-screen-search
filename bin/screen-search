@@ -13,7 +13,7 @@
 #
 # Exit codes: 0 ok (cancel is 0) · 1 failure · 2 bad argument/provider ·
 # 3 browser could not be launched · 4 provider lacks this capability ·
-# 11 no text/QR found · 12 OCR engine missing.
+# 11 no text/QR found · 12 OCR engine missing · 13 QR decoder missing.
 set -euo pipefail
 
 PLUGIN_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/.." && pwd)"

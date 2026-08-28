@@ -106,6 +106,7 @@ eq(M.messageForExit(4, "visual"), "Not supported by this provider", "exit 4")
 eq(M.messageForExit(12, "ocr"), "OCR engine unavailable", "exit 12")
 eq(M.messageForExit(11, "qr"), "No QR code found", "exit 11 qr")
 eq(M.messageForExit(11, "ocr"), "No text detected", "exit 11 ocr")
+eq(M.messageForExit(13, "qr"), "QR decoder not installed", "exit 13")
 eq(M.messageForExit(143, "capture"), "Something went wrong", "exit unknown")
 
 console.log(`model.test: ${pass} passed, ${fail} failed`)
