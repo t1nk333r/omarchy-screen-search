@@ -50,6 +50,9 @@ Item {
   // tearing down after the drag release — Hyprland clears a grab established
   // during that churn immediately, which dismissed the card the instant it
   // appeared. Arm it shortly after the card settles instead.
+  // Monotonic run stamp: a Process exit from a run cancelled by open()/close()
+  // must not touch the state of the run that replaced it.
+  property int runSeq: 0
   property bool grabArmed: false
   onInteractiveChanged: {
     if (interactive) { grabArmed = false; grabArmTimer.restart() }
@@ -65,6 +68,7 @@ Item {
   function open(payloadJson) {
     var p = {}
     try { p = JSON.parse(payloadJson || "{}") } catch (e) {}
+    runSeq++
     if (captureProc.running) captureProc.running = false
     if (actionProc.running) actionProc.running = false
     if (opened && state === "result") discardCapture()
@@ -80,11 +84,13 @@ Item {
       Qt.callLater(function() { keys.forceActiveFocus() })
       return
     }
+    captureProc.seq = runSeq
     captureProc.command = [root.cli + "-capture", "--mode", mode]
     captureProc.running = true
   }
 
   function close() {
+    runSeq++
     if (captureProc.running) captureProc.running = false   // terminates the picker group
     if (actionProc.running) actionProc.running = false
     discardCapture()
@@ -102,10 +108,12 @@ Item {
     if (payload && payload.file) Util.execArgv([root.cli, "act", "discard", "--file", payload.file])
   }
 
+  function scheduleHide(ms) { hideTimer.interval = ms; hideTimer.restart() }
+
   function finish(msg) {
     // Terminal states show a compact confirmation then close.
     if (msg) { message = msg; state = "failed" } else dismiss()
-    if (msg) hideTimer.restart()
+    if (msg) scheduleHide(2500)
   }
 
   function runAction(id, extra) {
@@ -128,6 +136,7 @@ Item {
       case "qr":          args = args.concat(["qr", "--file", f]); break
       default: return
     }
+    actionProc.seq = runSeq
     actionProc.action = id
     actionProc.command = args
     busyLabel = id === "ocr" || id === "translate-image" ? "Reading text…" : "Working…"
@@ -179,15 +188,17 @@ Item {
 
   Process {
     id: captureProc
+    property int seq: -1
     stdout: StdioCollector { id: captureOut; waitForEnd: true }
     onExited: function(code) {
+      if (captureProc.seq !== root.runSeq) return   // stale run, cancelled by open()/close()
       if (code === 0) {
         try { root.payload = JSON.parse(captureOut.text) } catch (e) { root.finish("Capture failed"); return }
         root.go("captured"); root.go("done")
         root.cursor = 0
         for (var i = 0; i < root.actions.length; i++) if (root.actions[i].def) root.cursor = i
         Qt.callLater(function() { keys.forceActiveFocus() })
-        if (Number(root.setting("osdTimeout", 0)) > 0) { hideTimer.interval = Number(root.setting("osdTimeout", 0)) * 1000; hideTimer.restart() }
+        if (Number(root.setting("osdTimeout", 0)) > 0) root.scheduleHide(Number(root.setting("osdTimeout", 0)) * 1000)
       } else if (code === 10) {
         root.dismiss()                       // cancellation is not a failure
       } else {
@@ -198,9 +209,11 @@ Item {
 
   Process {
     id: actionProc
+    property int seq: -1
     property string action: ""
     stdout: StdioCollector { id: actionOut; waitForEnd: true }
     onExited: function(code) {
+      if (actionProc.seq !== root.runSeq) return    // stale run, cancelled by open()/close()
       var id = actionProc.action
       if (code !== 0) {
         root.go("done")

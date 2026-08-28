@@ -42,7 +42,7 @@ Config single source of truth: inline entry in `~/.config/omarchy/shell.json`
 |---|---|---|
 | M1 | 003 Model.js node suite + run.sh floor | DONE: 61 asserts 0 fail; floor(130) verified to fail the run |
 | M2 | 004 providers --json | DONE: json=6, zero QML regexes, human output unchanged, overlay+bar live |
-| M3 | 005 OSD lifecycle (seq guard, scheduleHide) | re-summon during selection: no "Something went wrong"; error toast always 2.5 s |
+| M3 | 005 OSD lifecycle (seq guard, scheduleHide) | DONE: double-summon→1 picker, replay unaffected, clean teardown |
 | M4 | 006 hardening sweep (5 fixes) | QR w/o zbar → "QR decoder not installed"; trailing-dot URL opens clean; traversal discard refused; parser arity exit 2; single pluginDirFromUrl |
 | M5 | 007 tooling + **doctor** | shellcheck clean; CI green on push; CLAUDE.md exists; `screen-search doctor` flags a dead/redirected provider URL non-zero |
 | M6 | 002 public-url visual search | consent card on EVERY upload (no remember-me); upload→uploadbyurl→results in 1 action; file deleted after search; `act visual` sends nothing without consent (strace: 0 connects) |
