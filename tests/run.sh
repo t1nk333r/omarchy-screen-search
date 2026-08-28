@@ -13,6 +13,7 @@ export HOME_ORIG="$HOME"
 trap 'rm -rf "$FAKE_LOG" "$SCREEN_SEARCH_TMP" "$SCREEN_SEARCH_SHELL_JSON"' EXIT
 
 pass=0; failn=0
+MIN_ASSERTIONS=130
 ok()   { pass=$((pass+1)); }
 bad()  { failn=$((failn+1)); printf '  FAIL: %s\n' "$1"; }
 assert_eq() { [[ "$1" == "$2" ]] && ok || bad "$3: expected [$2] got [$1]"; }
@@ -29,6 +30,26 @@ for t in "$HERE"/*.test.sh; do
   # shellcheck source=/dev/null
   source "$t"
 done
+# Node unit suite for Model.js (pure logic). Skipped only when node is absent.
+if command -v node >/dev/null 2>&1; then
+  if out=$(node "$HERE/model.test.js" 2>&1); then
+    n=$(sed -n 's/^model.test: \([0-9]*\) passed.*/\1/p' <<<"$out")
+    pass=$((pass + ${n:-0}))
+    [[ ${n:-0} -gt 0 ]] || { failn=$((failn+1)); printf '  FAIL: model.test.js reported zero assertions\n'; }
+  else
+    failn=$((failn+1)); printf '  FAIL: model.test.js failed:\n%s\n' "$out"
+  fi
+else
+  printf '  SKIP: node not found — Model.js suite not run\n'
+fi
+
+# Assertion floor: a test file that silently no-ops (early abort under set -u)
+# must fail the run, not shrink it.
+if (( pass + failn < MIN_ASSERTIONS )); then
+  failn=$((failn+1))
+  printf '  FAIL: only %d assertions ran (floor %d) — a test file silently skipped\n' "$((pass+failn-1))" "$MIN_ASSERTIONS"
+fi
+
 printf '\n%d passed, %d failed\n' "$pass" "$failn"
 [[ $failn -eq 0 ]] && echo "all tests passed"
 [[ $failn -eq 0 ]]
