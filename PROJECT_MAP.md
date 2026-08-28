@@ -44,7 +44,7 @@ Config single source of truth: inline entry in `~/.config/omarchy/shell.json`
 | M2 | 004 providers --json | DONE: json=6, zero QML regexes, human output unchanged, overlay+bar live |
 | M3 | 005 OSD lifecycle | DONE: seq guard + scheduleHide; double-summon→1 picker, clean teardown |
 | M4 | 006 hardening sweep | DONE: 5 scoped commits; 154 assertions; exit registry adds 13 |
-| M5 | 007 tooling + **doctor** | shellcheck clean; CI green on push; CLAUDE.md exists; `screen-search doctor` flags a dead/redirected provider URL non-zero |
+| M5 | 007 tooling + doctor | DONE: shellcheck clean+gated, CI w/ weekly doctor, CLAUDE.md, .gitignore |
 | M6 | 002 public-url visual search | consent card on EVERY upload (no remember-me); upload→uploadbyurl→results in 1 action; file deleted after search; `act visual` sends nothing without consent (strace: 0 connects) |
 
 ## [ORPHANS & PENDING]
@@ -59,4 +59,3 @@ Config single source of truth: inline entry in `~/.config/omarchy/shell.json`
   config choices for networks where they work.
 - Doctor is NEW scope (not in plans/): lives as `screen-search doctor` + CI job in M5.
 - ImgOps autopaste + `visualAutoPaste` become legacy once M6 lands; decide keep-or-drop at M6.
-- shellcheck not yet installed (M5 asks user; sudo).

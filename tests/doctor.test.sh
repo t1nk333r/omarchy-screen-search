@@ -1,3 +1,4 @@
+S="$PLUGIN_DIR/bin/screen-search"
 # doctor: flags off-site redirects / dead endpoints, exits 0 when healthy
 DOC_FAKE=$(mktemp -d)
 cat > "$DOC_FAKE/curl" <<'X'
