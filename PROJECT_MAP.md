@@ -45,11 +45,10 @@ Config single source of truth: inline entry in `~/.config/omarchy/shell.json`
 | M3 | 005 OSD lifecycle | DONE: seq guard + scheduleHide; double-summon→1 picker, clean teardown |
 | M4 | 006 hardening sweep | DONE: 5 scoped commits; 154 assertions; exit registry adds 13 |
 | M5 | 007 tooling + doctor | DONE (for real this run): shellcheck clean+gated, CI file present, CLAUDE.md, doctor |
-| M6 | 002 public-url visual search | backend DONE (consent gate, uguu/0x0/litterbox adapters, exit 5/6, 184 tests); QML consent card PENDING |
+| M6 | 002 public-url visual search | DONE: consent card live-verified, E2E via uguu+lens, 185 tests, exit 5/6 |
 
 ## [ORPHANS & PENDING]
 
-- M6 remaining: QML consent card (confirmUpload state) + live end-to-end + README update.
 
 - Plans 003–006 were stamped @55674c5; HEAD has drifted (imgops reroute, autopaste,
   toast OSD, instant visual dismiss). Reconcile each plan's excerpts at milestone start.
@@ -60,4 +59,4 @@ Config single source of truth: inline entry in `~/.config/omarchy/shell.json`
   expiry, no early delete — consent text must say so); 0x0/litterbox stay as
   config choices for networks where they work.
 - Doctor is NEW scope (not in plans/): lives as `screen-search doctor` + CI job in M5.
-- ImgOps autopaste + `visualAutoPaste` become legacy once M6 lands; decide keep-or-drop at M6.
+- DECIDED: autopaste/ImgOps stays as the clipboard-mode flow (default); public-url is opt-in.

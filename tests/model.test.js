@@ -110,6 +110,7 @@ eq(M.messageForExit(12, "ocr"), "OCR engine unavailable", "exit 12")
 eq(M.messageForExit(11, "qr"), "No QR code found", "exit 11 qr")
 eq(M.messageForExit(11, "ocr"), "No text detected", "exit 11 ocr")
 eq(M.messageForExit(13, "qr"), "QR decoder not installed", "exit 13")
+eq(M.messageForExit(5, "visual"), "Upload failed — try Clipboard mode", "exit 5")
 eq(M.messageForExit(143, "capture"), "Something went wrong", "exit unknown")
 
 eq(M.pluginDirFromUrl("file:///home/u/x/"), "/home/u/x", "pluginDirFromUrl strips scheme+slash")

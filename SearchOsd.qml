@@ -38,6 +38,8 @@ Item {
   property int cursor: 0
   property bool expanded: false
   property bool pickingProvider: false
+  property bool confirmingUpload: false
+  property var consentInfo: null
   property int pickerCursor: 0
   property var providers: []
   property var caps: ({ text: true, visual: true })
@@ -74,6 +76,7 @@ Item {
     if (opened && state === "result") discardCapture()
     mode = p.mode === "ocr" ? "ocr" : "circle"
     payload = {}; message = ""; cursor = 0; expanded = false; pickingProvider = false
+    confirmingUpload = false; consentInfo = null
     state = "idle"; go("start")
     busyLabel = mode === "ocr" ? "Select text on screen…" : "Select something on screen…"
     opened = true
@@ -119,7 +122,9 @@ Item {
   function runAction(id, extra) {
     var a = null
     for (var i = 0; i < actions.length; i++) if (actions[i].id === id) a = actions[i]
-    if (!a) return
+    // visual-confirmed is not a card action: it is only reachable from the
+    // consent view after the user approved this exact upload.
+    if (!a && id !== "visual-confirmed") return
     var args = [root.cli, "act"]
     var f = payload.file || "", t = payload.text || ""
     switch (id) {
@@ -129,6 +134,7 @@ Item {
       case "translate":   args = args.concat(["translate", "--text", t]); break
       case "open-url":    args = args.concat(["open-url", "--text", a.arg]); break
       case "visual":      args = args.concat(["visual", "--file", f]); if (extra) args = args.concat(["--provider", extra]); break
+      case "visual-confirmed": args = args.concat(["visual-confirmed", "--file", f]); break
       case "copy-image":  args = args.concat(["copy-image", "--file", f]); break
       case "save":        args = args.concat(["save", "--file", f]); break
       case "ocr":         args = args.concat(["ocr", "--file", f]); break
@@ -145,6 +151,7 @@ Item {
   }
 
   function activateCursor() {
+    if (confirmingUpload) { confirmingUpload = false; runAction("visual-confirmed"); return }
     if (pickingProvider) { chooseProvider(pickerCursor); return }
     if (state === "failed") { dismiss(); return }
     if (actions.length) runAction(actions[Math.max(0, Math.min(cursor, actions.length - 1))].id)
@@ -163,7 +170,7 @@ Item {
   }
 
   function onKey(t) {
-    if (pickingProvider) return
+    if (confirmingUpload || pickingProvider) return
     if (t === "w" && payload.kind === "image") { pickingProvider = true; pickerCursor = 0; return }
     if (t === "e" && payload.kind === "text") { expanded = !expanded; return }
     for (var i = 0; i < actions.length; i++) if (actions[i].key === t) { cursor = i; runAction(actions[i].id); return }
@@ -240,10 +247,24 @@ Item {
         }
         case "copy": case "copy-image": case "save":
           root.go("done"); root.message = id === "save" ? "Saved to Pictures" : "Copied"; msgTimer.restart(); break
-        case "visual":
-          // Dismiss immediately: the OSD holds exclusive keyboard focus and a
-          // focus grab, which would block the browser from being focused and
-          // swallow the automated Ctrl+V. The browser opening IS the feedback.
+        case "visual": {
+          // public-url mode answers with a consent request; nothing was
+          // uploaded yet. Clipboard mode proceeds straight to the browser, so
+          // dismiss immediately — the OSD holds exclusive keyboard focus and
+          // would otherwise swallow the automated paste.
+          var r = null
+          try { r = JSON.parse(actionOut.text) } catch (e) {}
+          if (r && r.needsConsent === true) {
+            root.consentInfo = r
+            root.confirmingUpload = true
+            root.go("done")
+            Qt.callLater(function() { keys.forceActiveFocus() })
+          } else {
+            root.dismiss()
+          }
+          break
+        }
+        case "visual-confirmed":
           root.dismiss(); break
         default:
           root.dismiss()
@@ -304,7 +325,11 @@ Item {
       id: keys
       anchors.fill: parent
       enabled: root.interactive
-      onCloseRequested: root.pickingProvider ? root.pickingProvider = false : root.dismiss()
+      onCloseRequested: {
+        if (root.confirmingUpload) { root.confirmingUpload = false; root.consentInfo = null }
+        else if (root.pickingProvider) root.pickingProvider = false
+        else root.dismiss()
+      }
       onActivateRequested: root.activateCursor()
       onReturnRequested: root.activateCursor()
       onTabRequested: function(d) {

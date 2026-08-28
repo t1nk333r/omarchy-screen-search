@@ -99,6 +99,7 @@ function messageForExit(code, action) {
     case 11: return action === "qr" ? "No QR code found" : "No text detected"
     case 12: return "OCR engine unavailable"
     case 13: return "QR decoder not installed"
+    case 5: return "Upload failed — try Clipboard mode"
     default: return "Something went wrong"
   }
 }

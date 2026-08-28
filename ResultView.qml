@@ -50,7 +50,7 @@ Item {
 
     // --- image result -------------------------------------------------------
     Row {
-      visible: osd.state === "result" && osd.payload.kind === "image"
+      visible: osd.state === "result" && osd.payload.kind === "image" && !osd.confirmingUpload
       spacing: Style.spacing.lg
       BorderSurface {
         width: root.previewSize; height: root.previewSize
@@ -82,7 +82,7 @@ Item {
 
     // --- text result --------------------------------------------------------
     Flickable {
-      visible: osd.state === "result" && osd.payload.kind === "text"
+      visible: osd.state === "result" && osd.payload.kind === "text" && !osd.confirmingUpload
       width: Math.min(root.maxWidth, textItem.implicitWidth)
       height: Math.min(Style.space(260), textItem.implicitHeight)
       contentHeight: textItem.implicitHeight
@@ -98,7 +98,7 @@ Item {
       }
     }
     Text {
-      visible: osd.state === "result" && osd.payload.kind === "text" && root.summary.truncated
+      visible: osd.state === "result" && osd.payload.kind === "text" && root.summary.truncated && !osd.confirmingUpload
       text: osd.expanded ? "E · collapse" : "E · expand"
       color: root.dim; font.family: root.family; font.pixelSize: Style.font.caption
     }
@@ -112,7 +112,7 @@ Item {
 
     // --- provider picker ("Search with…") ----------------------------------
     Column {
-      visible: osd.state === "result" && osd.pickingProvider
+      visible: osd.state === "result" && osd.pickingProvider && !osd.confirmingUpload
       spacing: Style.spacing.xs
       Repeater {
         model: osd.providers
@@ -130,9 +130,49 @@ Item {
       }
     }
 
+    // --- upload consent (public-url mode; shown before EVERY upload) --------
+    Column {
+      visible: osd.confirmingUpload
+      spacing: Style.spacing.md
+      width: Math.min(root.maxWidth, Style.space(420))
+      Text {
+        text: "Upload to " + (osd.consentInfo ? osd.consentInfo.host : "") + "?"
+        color: root.fg; font.family: root.family; font.pixelSize: Style.font.title; font.bold: true
+      }
+      Text {
+        width: parent.width
+        wrapMode: Text.Wrap
+        textFormat: Text.PlainText
+        text: osd.consentInfo
+          ? "This will upload the screenshot to " + osd.consentInfo.host + ", a free public file host.\n" +
+            "• Anyone with the link can view it until it expires (" + osd.consentInfo.expiryHours + " h). " +
+            (osd.consentInfo.deletable ? "It is deleted right after the search." : "It cannot be deleted early.") + "\n" +
+            "• The host may log your IP address. " + osd.consentInfo.provider + " will download it from there.\n" +
+            "Nothing has been uploaded yet."
+          : ""
+        color: root.dim; font.family: root.family; font.pixelSize: Style.font.bodySmall
+      }
+      Row {
+        spacing: Style.spacing.controlGap
+        Button {
+          text: "Upload & search"
+          bordered: true; selected: true
+          foreground: root.fg
+          onClicked: { osd.confirmingUpload = false; osd.runAction("visual-confirmed") }
+        }
+        Button {
+          text: "Cancel"
+          bordered: true
+          foreground: root.fg
+          onClicked: { osd.confirmingUpload = false; osd.consentInfo = null }
+        }
+      }
+      Text { text: "Enter · upload    Esc · back"; color: root.dim; font.family: root.family; font.pixelSize: Style.font.caption }
+    }
+
     // --- actions ------------------------------------------------------------
     Row {
-      visible: osd.state === "result" && !osd.pickingProvider
+      visible: osd.state === "result" && !osd.pickingProvider && !osd.confirmingUpload
       spacing: Style.spacing.controlGap
       Repeater {
         model: osd.actions
@@ -152,7 +192,7 @@ Item {
     }
 
     Text {
-      visible: osd.state === "result" && !osd.pickingProvider
+      visible: osd.state === "result" && !osd.pickingProvider && !osd.confirmingUpload
       text: "Enter · " + (osd.actions[osd.cursor] ? osd.actions[osd.cursor].label : "") + "    Esc · close"
       color: root.dim; font.family: root.family; font.pixelSize: Style.font.caption
     }

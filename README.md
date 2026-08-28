@@ -80,9 +80,13 @@ nothing.
 - OCR runs locally (tesseract). Recognised text and capture paths are never
   logged or shown in notifications. QR values go only to the clipboard,
   marked sensitive.
-- A later, opt-in "temporary public upload" mode (one-tap `uploadbyurl` search)
-  is specified in `~/.config/omarchy/plans/002-ephemeral-upload-visual-search.md`;
-  it will show a public-host warning before every upload. Not enabled here.
+- Opt-in **public-url mode** (`omarchy bar set t1nk33r.screen-search
+  visualMode public-url`): one action — the capture is uploaded to a free
+  ephemeral host (default uguu.se, 3 h expiry; also 0x0.st with early delete,
+  litterbox) and the provider's search-by-URL results open directly. A
+  consent card appears before EVERY upload (host, expiry, deletability, IP
+  note) and there is deliberately no "don't ask again". Nothing is sent on
+  Cancel. Clipboard mode stays the default.
 
 ## Install / uninstall
 
