@@ -5,6 +5,7 @@
 CAPTURE_DIR="${SCREEN_SEARCH_TMP:-${XDG_RUNTIME_DIR:-/tmp}/screen-search}"
 
 capture_dir() {
+  # shellcheck disable=SC2174 # -m on the deepest dir is exactly the intent; chmod below re-asserts it
   mkdir -p -m 700 "$CAPTURE_DIR"
   chmod 700 "$CAPTURE_DIR" 2>/dev/null || true
   printf '%s' "$CAPTURE_DIR"

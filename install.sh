@@ -48,8 +48,11 @@ omarchy-shell shell rescanPlugins >/dev/null 2>&1 || warn "Shell not running; it
 if omarchy plugin list 2>/dev/null | grep -q "$PLUGIN_ID.*enabled"; then
   say "Plugin already enabled."
 else
-  omarchy plugin enable "$PLUGIN_ID" >/dev/null 2>&1 && say "Enabled bar widget." \
-    || warn "Could not enable via IPC; enable it from Setup > Plugins."
+  if omarchy plugin enable "$PLUGIN_ID" >/dev/null 2>&1; then
+    say "Enabled bar widget."
+  else
+    warn "Could not enable via IPC; enable it from Setup > Plugins."
+  fi
 fi
 
 # --- CLI symlink -------------------------------------------------------------

@@ -45,7 +45,7 @@ fi
 
 # Static gate over the bash surface. Skips (loudly) until shellcheck is installed.
 if command -v shellcheck >/dev/null 2>&1; then
-  if shellcheck -x "$PLUGIN_DIR"/bin/screen-search "$PLUGIN_DIR"/bin/screen-search-capture        "$PLUGIN_DIR"/bin/screen-search-doctor "$PLUGIN_DIR"/lib/*.sh        "$PLUGIN_DIR"/install.sh "$PLUGIN_DIR"/uninstall.sh; then
+  if shellcheck -x -P "$PLUGIN_DIR/lib" "$PLUGIN_DIR"/bin/screen-search "$PLUGIN_DIR"/bin/screen-search-capture        "$PLUGIN_DIR"/bin/screen-search-doctor "$PLUGIN_DIR"/lib/*.sh        "$PLUGIN_DIR"/install.sh "$PLUGIN_DIR"/uninstall.sh; then
     ok
   else
     failn=$((failn+1)); printf '  FAIL: shellcheck reported issues\n'

@@ -66,10 +66,10 @@ open_in_browser() {
 autopaste_into_browser() {
   [[ -n ${SCREEN_SEARCH_NO_AUTOPASTE:-} ]] && return 0
   command -v hyprctl >/dev/null 2>&1 || return 0
-  local url=$1 host base addr="" i
+  local url=$1 host base addr=""
   host=${url#*://}; host=${host%%/*}; host=${host#www.}
   base=${host%%.*}
-  for i in $(seq 1 "${SCREEN_SEARCH_AUTOPASTE_TRIES:-40}"); do
+  for _ in $(seq 1 "${SCREEN_SEARCH_AUTOPASTE_TRIES:-40}"); do
     addr=$(hyprctl clients -j 2>/dev/null | jq -r --arg b "$base"       '[.[] | select((.title | test($b; "i")) and (.class | test("chromium|chrome|firefox|brave|edge"; "i")))][0].address // empty')
     [[ -n $addr ]] && break
     sleep 0.2
