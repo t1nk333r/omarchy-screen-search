@@ -164,18 +164,14 @@ Item {
 
   Process {
     id: providersProc
-    command: [root.cli, "providers"]
+    command: [root.cli, "providers", "--json"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {
-        var rows = text.trim().split("\n"), list = [], cur = null
-        for (var i = 0; i < rows.length; i++) {
-          var m = rows[i].match(/^(\S+)\s+(.+?)\s{2,}(\S+)\s+(\S+)\s*(\*)?$/)
-          if (!m) continue
-          var p = { id: m[1], name: m[2], text: m[3] === "text", visual: m[4] === "visual", current: m[5] === "*" }
-          list.push(p); if (p.current) cur = p
-        }
+        var list = [], cur = null
+        try { list = JSON.parse(text) } catch (e) { list = [] }
         root.providers = list
+        for (var i = 0; i < list.length; i++) if (list[i].current) cur = list[i]
         if (cur) { root.providerName = cur.name; root.caps = { text: cur.text, visual: cur.visual } }
       }
     }

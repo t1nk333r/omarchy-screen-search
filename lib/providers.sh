@@ -23,6 +23,18 @@ providers_list() {
         (if .key == $cur then "*" else "" end) ] | @tsv' "$PROVIDERS_JSON"
 }
 
+# providers_json -> one JSON array with capability booleans and the current
+# flag. This is the machine interface the QML consumes; the TSV/awk pair
+# above stays for the human-readable listing.
+providers_json() {
+  local cur; cur=$(current_provider)
+  jq -c --arg cur "$cur" '
+    [ to_entries[] | select(.key | startswith("_") | not)
+      | { id: .key, name: .value.name,
+          text: (.value.text != null), visual: (.value.visual != null),
+          current: (.key == $cur) } ]' "$PROVIDERS_JSON"
+}
+
 # text_search_url <provider> <query>
 text_search_url() {
   local p=$1 q=$2 tpl

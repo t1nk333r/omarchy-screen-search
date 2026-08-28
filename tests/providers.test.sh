@@ -57,3 +57,14 @@ assert_grep "$FAKE_LOG" 'translate.google.com/?sl=auto&tl=ar&text=hi&op=translat
 # --- open-url only for real URLs
 reset_log; "$S" act open-url --text 'example.com' >/dev/null 2>&1; assert_rc $? 1 "bare domain not opened"
 reset_log; "$S" act open-url --text 'https://example.com/a?b=c' >/dev/null; assert_grep "$FAKE_LOG" 'omarchy-launch-browser \[https://example.com/a?b=c\]' "https url opened"
+
+# --- providers --json is the machine interface the QML consumes
+write_shell_json '{"provider":"google"}'
+out=$("$S" providers --json)
+jq -e 'length==6' <<<"$out" >/dev/null && ok || bad "json has 6 providers"
+jq -e '[.[]|select(.current)]|length==1' <<<"$out" >/dev/null && ok || bad "exactly one current"
+jq -e '.[0]|has("id") and has("name") and has("text") and has("visual")' <<<"$out" >/dev/null && ok || bad "json fields"
+jq -e '[.[]|select(.id=="tineye")][0] | .text==false and .visual==true' <<<"$out" >/dev/null && ok || bad "tineye caps in json"
+write_shell_json '{"provider":"bing"}'
+"$S" providers --json | jq -e '[.[]|select(.current)][0].id=="bing"' >/dev/null && ok || bad "current follows setting"
+write_shell_json '{}'

@@ -49,16 +49,11 @@ BarWidget {
   Process {
     id: providersProc
     running: true
-    command: [root.cli, "providers"]
+    command: [root.cli, "providers", "--json"]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {
-        var rows = text.trim().split("\n"), list = []
-        for (var i = 0; i < rows.length; i++) {
-          var m = rows[i].match(/^(\S+)\s+(.+?)\s{2,}(\S+)\s+(\S+)/)
-          if (m) list.push({ id: m[1], name: m[2], text: m[3] === "text", visual: m[4] === "visual" })
-        }
-        root.providers = list
+        try { root.providers = JSON.parse(text) } catch (e) { root.providers = [] }
       }
     }
   }

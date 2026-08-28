@@ -41,7 +41,7 @@ Config single source of truth: inline entry in `~/.config/omarchy/shell.json`
 | M | Scope (plan) | Verifiable goal |
 |---|---|---|
 | M1 | 003 Model.js node suite + run.sh floor | DONE: 61 asserts 0 fail; floor(130) verified to fail the run |
-| M2 | 004 providers --json | `providers --json \| jq length` = 6; `grep -c 'match(/' *.qml` = 0; popup renders live |
+| M2 | 004 providers --json | DONE: json=6, zero QML regexes, human output unchanged, overlay+bar live |
 | M3 | 005 OSD lifecycle (seq guard, scheduleHide) | re-summon during selection: no "Something went wrong"; error toast always 2.5 s |
 | M4 | 006 hardening sweep (5 fixes) | QR w/o zbar → "QR decoder not installed"; trailing-dot URL opens clean; traversal discard refused; parser arity exit 2; single pluginDirFromUrl |
 | M5 | 007 tooling + **doctor** | shellcheck clean; CI green on push; CLAUDE.md exists; `screen-search doctor` flags a dead/redirected provider URL non-zero |

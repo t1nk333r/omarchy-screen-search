@@ -100,7 +100,11 @@ case $cmd in
     fi
     ;;
   providers)
-    providers_list | awk -F'\t' '{ printf "%-12s %-16s %-6s %-7s %s\n", $1, $2, $3, $4, $5 }'
+    if [[ ${1:-} == "--json" ]]; then
+      providers_json
+    else
+      providers_list | awk -F'\t' '{ printf "%-12s %-16s %-6s %-7s %s\n", $1, $2, $3, $4, $5 }'
+    fi
     ;;
   act)
     [[ -n ${1:-} ]] || fail "usage: screen-search act ACTION [--file F] [--text T]" 2
