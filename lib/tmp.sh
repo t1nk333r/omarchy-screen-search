@@ -17,9 +17,14 @@ new_capture_file() {
 
 # Remove one capture; only files inside CAPTURE_DIR are ever deleted.
 discard_capture() {
-  local f=$1
-  [[ -n $f && $f == "$CAPTURE_DIR"/* && -f $f ]] || return 0
-  rm -f -- "$f"
+  local f=$1 real dir
+  # The old glob guard matched "/" in "*", so a ../ path could satisfy it.
+  # Canonicalize both sides and refuse symlinks before deleting.
+  [[ -n $f && -f $f && ! -L $f ]] || return 0
+  real=$(realpath -m -- "$f" 2>/dev/null) || return 0
+  dir=$(realpath -m -- "$CAPTURE_DIR" 2>/dev/null) || return 0
+  [[ $real == "$dir"/* && $real != *".."* ]] || return 0
+  rm -f -- "$real"
 }
 
 # Captures older than 10 minutes are orphans (shell crash, killed process).

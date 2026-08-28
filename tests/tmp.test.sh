@@ -21,3 +21,14 @@ assert_rc "$rc" 0 "selection exits 0"
 [[ $(jq -r .kind <<<"$out") == image ]] && ok || bad "selection returns image kind"
 cf=$(jq -r .file <<<"$out"); [[ -f $cf ]] && ok || bad "capture file kept after selection"
 
+
+# containment: traversal and symlinks are refused
+victim="$SCREEN_SEARCH_TMP/../discard-victim.$$"; touch "$victim"
+"$S" act discard --file "$SCREEN_SEARCH_TMP/../$(basename "$victim")"
+[[ -e $victim ]] && ok || bad "discard refuses ../ traversal"
+rm -f "$victim"
+tgt="$SCREEN_SEARCH_TMP/keep-target.png"; lnk="$SCREEN_SEARCH_TMP/capture-link.png"
+touch "$tgt"; ln -s "$tgt" "$lnk"
+"$S" act discard --file "$lnk"
+[[ -e $tgt ]] && ok || bad "discard does not follow symlinks"
+rm -f "$lnk" "$tgt"
