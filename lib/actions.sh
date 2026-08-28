@@ -43,7 +43,21 @@ run_action() {
       open_in_browser "$url"
       ;;
     visual)
-      visual_search "$provider" "$file"
+      if [[ $(setting visualMode clipboard) == public-url ]]; then
+        # Consent gate: NOTHING is uploaded here. The caller (OSD or CLI)
+        # must show the notice and re-invoke as visual-confirmed.
+        local meta dhost hours deletable
+        meta=$(upload_meta "$(setting uploadHost uguu)") || fail "unknown uploadHost" 2
+        IFS=$'\t' read -r dhost hours deletable <<<"$meta"
+        jq -cn --arg h "$dhost" --arg e "$hours" --argjson d "$deletable" \
+          --arg p "$(provider_name "$provider")" \
+          '{needsConsent:true, host:$h, expiryHours:($e|tonumber), deletable:$d, provider:$p}'
+      else
+        visual_search "$provider" "$file"
+      fi
+      ;;
+    visual-confirmed)
+      visual_search_confirmed "$provider" "$file"
       ;;
     translate)
       [[ -n $text ]] || fail "nothing to translate" 1

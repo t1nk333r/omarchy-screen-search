@@ -4,6 +4,8 @@
 
 # shellcheck source=config.sh
 source "$(dirname -- "${BASH_SOURCE[0]}")/config.sh"
+# shellcheck source=upload.sh
+source "$(dirname -- "${BASH_SOURCE[0]}")/upload.sh"
 
 urlencode() { jq -rn --arg q "$1" '$q|@uri'; }
 
@@ -90,10 +92,17 @@ autopaste_into_browser() {
   # and navigate away, destroying the editor.
 }
 
+# visual_url_template <provider> — the {u} search-by-image-URL template.
+visual_url_template() {
+  jq -r --arg p "$1" '.[$p].visualUrl // empty' "$PROVIDERS_JSON"
+}
+
 # visual_search <provider> <file>
-# The only image flow in v1 is clipboard-upload: the PNG goes to the clipboard
-# (marked sensitive so clipboard history skips it) and the provider's upload
-# page opens; the user pastes. Nothing is uploaded by this tool.
+# Default flow is clipboard-upload: the PNG goes to the clipboard (marked
+# sensitive so clipboard history skips it) and the provider's upload page
+# opens; the user pastes. Nothing is uploaded by this tool in that mode.
+# The opt-in public-url mode is handled by visual_search_confirmed and is
+# reachable ONLY through the consent gate in lib/actions.sh.
 visual_search() {
   local p=$1 file=$2 mode url
   provider_exists "$p" || fail "unknown provider: $p" 2
@@ -113,4 +122,33 @@ visual_search() {
       ;;
     *) fail "unsupported visual mode: $mode" 4 ;;
   esac
+}
+
+# visual_search_confirmed <provider> <file>
+# The ONLY call site that uploads. Preconditions (enforced by the caller):
+# the user has just confirmed the per-upload notice for exactly this capture.
+visual_search_confirmed() {
+  local p=$1 file=$2 tpl host url token enc target
+  provider_exists "$p" || fail "unknown provider: $p" 2
+  tpl=$(visual_url_template "$p")
+  [[ -n $tpl ]] || fail "$(provider_name "$p") has no search-by-URL support" 4
+  [[ -r $file ]] || fail "capture not found" 1
+  host=$(setting uploadHost uguu)
+  IFS=$'\t' read -r url token < <(upload_ephemeral "$host" "$file") || true
+  [[ -n ${url:-} ]] || fail "upload failed" 5
+  enc=$(urlencode "$url")
+  target=${tpl//\{u\}/$enc}
+  if ! omarchy-launch-browser "$target" >/dev/null 2>&1; then
+    delete_ephemeral "$host" "$url" "$token"
+    fail "browser could not be launched" 3
+  fi
+  # Give the engine time to fetch, then take the image down where the host
+  # allows it. Detached so the caller returns immediately.
+  local delay=${SCREEN_SEARCH_DELETE_DELAY:-90}
+  if (( delay > 0 )); then
+    ( sleep "$delay"; delete_ephemeral "$host" "$url" "$token" ) >/dev/null 2>&1 &
+    disown 2>/dev/null || true
+  else
+    delete_ephemeral "$host" "$url" "$token"
+  fi
 }

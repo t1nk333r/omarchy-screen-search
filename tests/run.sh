@@ -13,7 +13,7 @@ export HOME_ORIG="$HOME"
 trap 'rm -rf "$FAKE_LOG" "$SCREEN_SEARCH_TMP" "$SCREEN_SEARCH_SHELL_JSON"' EXIT
 
 pass=0; failn=0
-MIN_ASSERTIONS=155
+MIN_ASSERTIONS=170
 ok()   { pass=$((pass+1)); }
 bad()  { failn=$((failn+1)); printf '  FAIL: %s\n' "$1"; }
 assert_eq() { [[ "$1" == "$2" ]] && ok || bad "$3: expected [$2] got [$1]"; }

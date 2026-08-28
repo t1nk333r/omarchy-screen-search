@@ -5,7 +5,8 @@
     "visual": {
       "mode": "clipboard-upload",
       "url": "https://imgops.com/"
-    }
+    },
+    "visualUrl": "https://lens.google.com/uploadbyurl?url={u}"
   },
   "bing": {
     "name": "Bing",
@@ -13,7 +14,8 @@
     "visual": {
       "mode": "clipboard-upload",
       "url": "https://imgops.com/"
-    }
+    },
+    "visualUrl": "https://www.bing.com/images/search?view=detailv2&iss=sbi&q=imgurl:{u}"
   },
   "brave": {
     "name": "Brave Search",
@@ -31,7 +33,8 @@
     "visual": {
       "mode": "clipboard-upload",
       "url": "https://yandex.com/images/"
-    }
+    },
+    "visualUrl": "https://yandex.com/images/search?rpt=imageview&url={u}"
   },
   "tineye": {
     "name": "TinEye",
@@ -39,7 +42,8 @@
     "visual": {
       "mode": "clipboard-upload",
       "url": "https://tineye.com/"
-    }
+    },
+    "visualUrl": "https://tineye.com/search?url={u}"
   },
   "_translate": {
     "google": {

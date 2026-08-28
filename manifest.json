@@ -30,7 +30,9 @@
       "previewSize": 160,
       "ocrLangs": "eng",
       "resultUi": "osd",
-      "visualAutoPaste": true
+      "visualAutoPaste": true,
+      "visualMode": "clipboard",
+      "uploadHost": "uguu"
     },
     "schema": [
       {
@@ -82,6 +84,16 @@
         "key": "visualAutoPaste",
         "type": "boolean",
         "label": "Auto-paste the image and submit on the provider page"
+      },
+      {
+        "key": "visualMode",
+        "type": "string",
+        "label": "Visual search sends the image via (clipboard = private paste flow, public-url = temporary public upload, asks every time)"
+      },
+      {
+        "key": "uploadHost",
+        "type": "string",
+        "label": "Temporary upload host (uguu, 0x0, litterbox)"
       }
     ]
   }

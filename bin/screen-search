@@ -13,6 +13,7 @@
 #
 # Exit codes: 0 ok (cancel is 0) · 1 failure · 2 bad argument/provider ·
 # 3 browser could not be launched · 4 provider lacks this capability ·
+# 5 upload failed · 6 consent required ·
 # 11 no text/QR found · 12 OCR engine missing · 13 QR decoder missing.
 set -euo pipefail
 
@@ -83,8 +84,28 @@ case $cmd in
     run_action search --text "$1" ${2:+--provider "$2"}
     ;;
   visual)
-    [[ -n ${1:-} ]] || fail "usage: screen-search visual FILE.png" 2
-    run_action visual --file "$1" ${2:+--provider "$2"}
+    [[ -n ${1:-} ]] || fail "usage: screen-search visual FILE.png [provider] [--yes]" 2
+    file=$1; prov=${2:-}; [[ $prov == --yes ]] && { prov=""; set -- "$1" "" "--yes"; }
+    if [[ $(setting visualMode clipboard) == public-url ]]; then
+      meta=$(upload_meta "$(setting uploadHost uguu)") || fail "unknown uploadHost" 2
+      IFS=$'\t' read -r dhost hours deletable <<<"$meta"
+      if [[ ${3:-${2:-}} != "--yes" ]]; then
+        cat >&2 <<NOTICE
+This will upload the screenshot to $dhost, a free public file host.
+- Anyone with the link can view it until it expires (${hours} h). $([[ $deletable == true ]] && echo "It is deleted right after the search." || echo "It cannot be deleted early.")
+- The host may log your IP address. The search engine will download it from there.
+Nothing has been uploaded yet.
+NOTICE
+        if [[ -t 0 && -t 1 ]] && command -v gum >/dev/null 2>&1; then
+          gum confirm "Upload to $dhost now?" || exit 6
+        else
+          fail "consent required: re-run with --yes to upload" 6
+        fi
+      fi
+      run_action visual-confirmed --file "$file" ${prov:+--provider "$prov"}
+    else
+      run_action visual --file "$file" ${prov:+--provider "$prov"}
+    fi
     ;;
   clipboard)
     text=$(wl-paste --no-newline --type text 2>/dev/null || true)
