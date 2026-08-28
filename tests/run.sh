@@ -13,7 +13,7 @@ export HOME_ORIG="$HOME"
 trap 'rm -rf "$FAKE_LOG" "$SCREEN_SEARCH_TMP" "$SCREEN_SEARCH_SHELL_JSON"' EXIT
 
 pass=0; failn=0
-MIN_ASSERTIONS=150
+MIN_ASSERTIONS=155
 ok()   { pass=$((pass+1)); }
 bad()  { failn=$((failn+1)); printf '  FAIL: %s\n' "$1"; }
 assert_eq() { [[ "$1" == "$2" ]] && ok || bad "$3: expected [$2] got [$1]"; }
@@ -41,6 +41,17 @@ if command -v node >/dev/null 2>&1; then
   fi
 else
   printf '  SKIP: node not found — Model.js suite not run\n'
+fi
+
+# Static gate over the bash surface. Skips (loudly) until shellcheck is installed.
+if command -v shellcheck >/dev/null 2>&1; then
+  if shellcheck -x "$PLUGIN_DIR"/bin/screen-search "$PLUGIN_DIR"/bin/screen-search-capture        "$PLUGIN_DIR"/bin/screen-search-doctor "$PLUGIN_DIR"/lib/*.sh        "$PLUGIN_DIR"/install.sh "$PLUGIN_DIR"/uninstall.sh; then
+    ok
+  else
+    failn=$((failn+1)); printf '  FAIL: shellcheck reported issues\n'
+  fi
+else
+  printf '  SKIP: shellcheck not installed\n'
 fi
 
 # Assertion floor: a test file that silently no-ops (early abort under set -u)

@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Provider endpoint health check. This is the ONLY network-touching binary in
+# the plugin, run exclusively on explicit request (`screen-search doctor`) or
+# in CI — never from the capture/search paths. It exists because provider
+# pages rot silently: lens.google.com/upload and bing.com/visualsearch both
+# decayed into marketing redirects before anyone noticed (2026-08).
+set -euo pipefail
+
+PLUGIN_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/.." && pwd)"
+PROVIDERS_JSON="$PLUGIN_DIR/providers.json"
+UA="screen-search-doctor/$(jq -r .version "$PLUGIN_DIR/manifest.json" 2>/dev/null || echo dev) (+https://github.com/t1nk333r/omarchy-screen-search)"
+FAILS=0
+
+host_of() { local h=${1#*://}; h=${h%%/*}; printf '%s' "${h#www.}"; }
+
+check_url() {
+  local kind=$1 id=$2 url=$3 out code redirect status="ok"
+  out=$(curl -sI -o /dev/null --max-time 15 -A "$UA" -w '%{http_code} %{redirect_url}' "$url" 2>/dev/null) || out="000 "
+  code=${out%% *}; redirect=${out#* }; redirect=${redirect% }
+  if [[ $code == 000 ]]; then status="UNREACHABLE"
+  elif (( code >= 400 )); then status="HTTP $code"
+  elif [[ -n $redirect && $(host_of "$redirect") != $(host_of "$url") ]]; then
+    status="REDIRECTS OFF-SITE -> $(host_of "$redirect")"
+  fi
+  printf '%-12s %-7s %-45s %s\n' "$id" "$kind" "$url" "$status"
+  [[ $status == ok ]] || FAILS=$((FAILS + 1))
+}
+
+while IFS=$'\t' read -r id kind url; do
+  check_url "$kind" "$id" "$url"
+done < <(jq -r '
+  to_entries[] | select(.key | startswith("_") | not) as $p |
+  ( if $p.value.text then [$p.key, "text", ($p.value.text | sub("\\{q\\}"; "test"))] else empty end ),
+  ( if $p.value.visual then [$p.key, "visual", $p.value.visual.url] else empty end )
+  | @tsv' "$PROVIDERS_JSON")
+
+if (( FAILS > 0 )); then
+  echo "doctor: $FAILS endpoint(s) unhealthy" >&2
+  exit 1
+fi
+echo "doctor: all provider endpoints healthy"
